@@ -478,6 +478,18 @@ class Bot(object):
 		- message: Message to kick user with.
 		"""
 		self._s._send("KICK {} {} :{}".format(channel, client, message))
+		
+	def banUser(self, channel, client):
+		"""
+		Ban client from channel
+		
+		Arguments:
+		- channel: Channel the client should be banned from.
+		- client: Client to be banned.
+		"""
+		clientname = client.split('@')
+		hostmask = "*!*@" + clientname[1]
+		self._s._send("MODE {} +b {}".format(channel, hostmask))
 	
 	def setMode(self, channel, target, flag):
 		"""

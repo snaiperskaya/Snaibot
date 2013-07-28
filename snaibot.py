@@ -25,15 +25,31 @@ import time
 
 global config
 global microLog
+global microLogSwear
+global microLogFlood
 
 def tryBuildConfig():
     if not os.path.exists('settings.ini'):
         print('Building Default settings.ini file...')
-        config['SERVER'] = {'botName': '', 'server': '',
+        config['SERVER'] = {'botName': 'snaibot', 'server': 'irc.rizon.net',
                             'channels': ''}
+        
         config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                        'Number of kicks before channel ban': '3',
-                                       'Naughty words':''}
+                                       'Naughty words':'fuck, cunt, shit, faggot, f4gg0t,f4ggot,f4g,dick,d1ck,d1ckhead,dickhead,cocksucker,pussy,motherfucker,muthafucker,muthafucka,fucker,fucking,fuckin,fuckhead,fuckface'}
+        
+        config['Keyword Links'] = {'wiki':'http://ftbwiki.org/Feed_The_Beast_Wiki',
+                                   'forum':'http://ftbforums.org/',
+                                   'forums':'http://ftbforums.org/',
+                                   'style':'http://ftbwiki.org/Feed_The_Beast_Wiki:Style_Guide',
+                                   'rules':'http://ftbwiki.org/Feed_The_Beast_Wiki:Policy',
+                                   'ftb':'http://goo.gl/j8Fn2b',
+                                   'server':'http://ftbforums.org/topic/555-server-details/',
+                                   'changes':'http://ftbwiki.org/Special:RecentChanges',
+                                   'reddit':'http://www.reddit.com/r/feedthebeast/',
+                                   'nocache':'http://nocache.ftbwiki.org/Special:UserLogin',
+                                   'vote':'http://ftbwiki.org/Feed_The_Beast_Wiki:Votes_for_Featured_Articles'}
+        
         with open('settings.ini', 'w') as configfile:
             config.write(configfile)
         print('Basic settings.ini file built. Please configure and restart bot...')
@@ -69,7 +85,7 @@ def spamFilter(msg, channel, nick, client, msgMatch):
         
         if nick not in tryOPVoice:
         
-            numTilKick = int(config['KICK/BAN Settings']['number of repeat messages before kick'])
+            numTilKick = int(config['KICK/BAN Settings']['number of repeat messages before kick']) - 1
             numTilBan = int(config['KICK/BAN Settings']['number of kicks before channel ban'])
             
             if channel not in microLog:
@@ -79,7 +95,7 @@ def spamFilter(msg, channel, nick, client, msgMatch):
                 microLog[channel][client] = [msg, 1, 0]
                 
             elif microLog[channel][client][0] == msg and microLog[channel][client][1] >= numTilKick and microLog[channel][client][2] >= (numTilBan - 1):
-                snaibot.setMode(channel, client, "b")
+                snaibot.banUser(channel, client)
                 snaibot.kickUser(channel, nick, 'Spamming (bot)')
                 microLog[channel][client][1] = numTilKick - 1
                 microLog[channel][client][2] = 0
@@ -98,7 +114,56 @@ def spamFilter(msg, channel, nick, client, msgMatch):
             
 
 def languageKicker(msg, channel, nick, client, msgMatch):
-    return
+    
+    if channel.upper() in snaibot._channels:
+        
+        tryOPVoice = opsListBuilder(channel)
+        
+        if nick not in tryOPVoice:    
+    
+            words = confListParser(config['KICK/BAN Settings']['Naughty words'])
+            msglist = msg.split()
+            
+            numTilKick = 1
+            numTilBan = int(config['KICK/BAN Settings']['number of kicks before channel ban'])    
+            
+            for i in words:
+                if i in msglist:
+                    if channel not in microLogSwear:
+                        microLogSwear[channel] = {client:[1, 0]}
+                        snaibot.sendMsg(channel, nick + ": Please watch your language...")
+                        
+                    elif client not in microLogSwear[channel]:
+                        microLogSwear[channel][client] = [1, 0]
+                        snaibot.sendMsg(channel, nick + ": Please watch your language...")
+                        
+                    elif microLogSwear[channel][client][0] >= numTilKick and microLogSwear[channel][client][1] >= numTilBan:
+                        snaibot.banUser(channel, client)
+                        snaibot.kickUser(channel, nick, 'Swearing (bot)')
+                        microLogSwear[channel][client][0] = numTilKick - 1
+                        microLogSwear[channel][client][1] = 0
+                        
+                    elif microLogSwear[channel][client][0] >= numTilKick:
+                        snaibot.kickUser(channel, nick, 'Swearing (bot)')
+                        microLogSwear[channel][client][0] = numTilKick - 1
+                        microLogSwear[channel][client][1] = microLogSwear[channel][client][1] + 1
+                        
+                    else:
+                        microLogSwear[channel][client][0] = microLogSwear[channel][client][0] + 1
+                        
+                    break
+    
+    
+def showMeLinks(msg, channel, nick, client, msgMatch):
+    
+    if msg[0] == '.':
+        
+        try:
+            toSend = config['Keyword Links'][msg[1:]]
+            snaibot.sendMsg(channel, nick + ": " + toSend)
+            
+        except:
+            return
 
 
 
@@ -121,8 +186,12 @@ if __name__ == '__main__':
         snaibot.joinChannel(channel)
     
     microLog = {}
+    microLogSwear = {}
+    microLogFlood = {}
     
     #snaibot.addMsgHandler(echo)
     snaibot.addMsgHandler(spamFilter)
+    snaibot.addMsgHandler(languageKicker)
+    snaibot.addMsgHandler(showMeLinks)
     
     snaibot.waitForDisconnect()
