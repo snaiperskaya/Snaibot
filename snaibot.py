@@ -21,6 +21,7 @@ __version__ = '0.5'
 import pythonircbot
 import configparser
 import os
+import time
 
 global config
 global microLog
@@ -47,12 +48,12 @@ def confListParser(configList):
 
 def opsListBuilder(channel):
     namelist = set()
-    namelist.add(snaibot.getVoices())
-    namelist.add(snaibot.getHops())
-    namelist.add(snaibot.getOps())
-    namelist.add(snaibot.getAops())
-    namelist.add(snaibot.getOwner())
-    return namelist()
+    namelist.update(snaibot.getVoices(channel))
+    namelist.update(snaibot.getHops(channel))
+    namelist.update(snaibot.getOps(channel))
+    namelist.update(snaibot.getAops(channel))
+    namelist.update(snaibot.getOwner(channel))
+    return namelist
 
 
 def echo(msg, channel, nick, client, msgMatch):
@@ -61,34 +62,39 @@ def echo(msg, channel, nick, client, msgMatch):
     
     
 def spamFilter(msg, channel, nick, client, msgMatch):
-    tryOPVoice = opsListBuilder(channel)
     
-    numTilKick = int(config['KICK/BAN Settings']['number of repeat messages before kick'])
-    numTilBan = int(config['KICK/BAN Settings']['number of kicks before channel ban'])
-    
-    if channel not in microLog:
-        microLog[channel] = {client:[msg, 1, 0]}
+    if channel.upper() in snaibot._channels:
         
-    elif client not in microLog[channel]:
-        microLog[channel][client] = [msg, 1, 0]
+        tryOPVoice = opsListBuilder(channel)
         
-    elif microLog[channel][client][0] == msg and microLog[channel][client][1] >= numTilKick and microLog[channel][client][2] >= (numTilBan - 1):
-        snaibot.setMode(channel, client, "b")
-        snaibot.kickUser(channel, nick, 'Spamming (bot)')
-        microLog[channel][client][1] = numTilKick - 1
-        microLog[channel][client][2] = 0
+        if nick not in tryOPVoice:
         
-    elif microLog[channel][client][0] == msg and microLog[channel][client][1] >= numTilKick:
-        snaibot.kickUser(channel, nick, 'Spamming (bot)')
-        microLog[channel][client][1] = numTilKick - 1
-        microLog[channel][client][2] = microLog[channel][client][2] + 1
-        
-    elif microLog[channel][client][0] == msg:
-        microLog[channel][client][1] = microLog[channel][client][1] + 1
-        
-    else:
-        microLog[channel][client][0] = msg
-        microLog[channel][client][1] = 1
+            numTilKick = int(config['KICK/BAN Settings']['number of repeat messages before kick'])
+            numTilBan = int(config['KICK/BAN Settings']['number of kicks before channel ban'])
+            
+            if channel not in microLog:
+                microLog[channel] = {client:[msg, 1, 0]}
+                
+            elif client not in microLog[channel]:
+                microLog[channel][client] = [msg, 1, 0]
+                
+            elif microLog[channel][client][0] == msg and microLog[channel][client][1] >= numTilKick and microLog[channel][client][2] >= (numTilBan - 1):
+                snaibot.setMode(channel, client, "b")
+                snaibot.kickUser(channel, nick, 'Spamming (bot)')
+                microLog[channel][client][1] = numTilKick - 1
+                microLog[channel][client][2] = 0
+                
+            elif microLog[channel][client][0] == msg and microLog[channel][client][1] >= numTilKick:
+                snaibot.kickUser(channel, nick, 'Spamming (bot)')
+                microLog[channel][client][1] = numTilKick - 1
+                microLog[channel][client][2] = microLog[channel][client][2] + 1
+                
+            elif microLog[channel][client][0] == msg:
+                microLog[channel][client][1] = microLog[channel][client][1] + 1
+                
+            else:
+                microLog[channel][client][0] = msg
+                microLog[channel][client][1] = 1
             
 
 def languageKicker(msg, channel, nick, client, msgMatch):
@@ -108,6 +114,8 @@ if __name__ == '__main__':
     
     snaibot = pythonircbot.Bot(config['SERVER']['botName'])
     snaibot.connect(config['SERVER']['server'], verbose = True)
+    
+    time.sleep(10)
     
     for channel in confListParser(config['SERVER']['channels']):
         snaibot.joinChannel(channel)

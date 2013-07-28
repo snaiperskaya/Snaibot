@@ -198,7 +198,7 @@ class _BotReceiveThread(threading.Thread):
 			self._die()
 	
 	def _names(self, line):
-		matchNames = re.compile('^:.* 353 {} = (.*) :(.*)'.format(self._bot._nick)).search(line)
+		matchNames = re.compile('^:.* 353 {} .* (.*) :(.*)'.format(self._bot._nick)).search(line)
 		if matchNames:
 			# Names list
 			channel = matchNames.group(1)
