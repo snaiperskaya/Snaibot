@@ -31,8 +31,10 @@ global microLogFlood
 def tryBuildConfig():
     if not os.path.exists('settings.ini'):
         print('Building Default settings.ini file...')
-        config['SERVER'] = {'botName': 'snaibot', 'server': 'irc.rizon.net',
-                            'channels': ''}
+        
+        config['SERVER'] = {'botName': 'snaibot',
+                            'server': 'irc.rizon.net',
+                            'channels': '#ircbottest'}
         
         config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                        'Number of kicks before channel ban': '3',
@@ -50,11 +52,14 @@ def tryBuildConfig():
                                    'nocache':'http://nocache.ftbwiki.org/Special:UserLogin',
                                    'vote':'http://ftbwiki.org/Feed_The_Beast_Wiki:Votes_for_Featured_Articles'}
         
+        config['NEWS'] = {'News Item':'*Insert Useful News Here*'}
+        
         with open('settings.ini', 'w') as configfile:
             config.write(configfile)
         print('Basic settings.ini file built. Please configure and restart bot...')
     else:
         print('Config File settings.ini found!')
+        config.read('settings.ini')
         
         
 def confListParser(configList):
@@ -156,7 +161,35 @@ def languageKicker(msg, channel, nick, client, msgMatch):
     
 def showMeLinks(msg, channel, nick, client, msgMatch):
     
-    if msg[0] == '.':
+    tryBuildConfig()
+    
+    testmsg = msg.lower()
+    
+    if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options':
+        toSend = '.help, .commands, .options, .news'
+        for i in config.options('Keyword Links'):
+            toSend = toSend + ', .' + i
+        snaibot.sendMsg(channel, nick + ": " + toSend)
+    
+    elif testmsg.split()[0] == '.news':
+        try:
+            if testmsg.split()[1] == 'edit':
+                tryOPVoice = opsListBuilder(channel)
+                if nick in tryOPVoice:
+                    news = ''
+                    for i in msg.split()[2:]:
+                        news = news + ' ' + i
+                    config['NEWS']['News Item'] = news[1:]
+                    with open('settings.ini', 'w') as configfile:
+                        config.write(configfile)
+                    snaibot.sendMsg(channel, 'News Updated in Config!')
+                        
+                else:
+                    snaibot.sendMsg(channel, config['NEWS']['News Item'])
+        except:
+            snaibot.sendMsg(channel, config['NEWS']['News Item'])
+    
+    elif testmsg[0] == '.':
         
         try:
             toSend = config['Keyword Links'][msg[1:]]
@@ -172,7 +205,6 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     
     tryBuildConfig()
-    config.read('settings.ini')
     
     if config['SERVER']['server'] == '':
         print('ERROR: Please check your settings.ini file...')
