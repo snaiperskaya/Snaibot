@@ -431,6 +431,7 @@ class Bot(object):
 		- channel: Channel name
 		"""
 		self._s._send("JOIN {}".format(channel))
+		self._channels[channel.upper()] = dict()
 	
 	def _joinedChannel(self, nick, channel):
 		if nick == self._nick:

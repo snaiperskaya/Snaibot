@@ -16,7 +16,7 @@
 
 
 __author__ = 'C.S.Putnam'
-__version__ = '0.5'
+__version__ = '1.0'
 
 import pythonircbot
 import configparser
@@ -32,13 +32,14 @@ def tryBuildConfig():
     if not os.path.exists('settings.ini'):
         print('Building Default settings.ini file...')
         
-        config['SERVER'] = {'botName': 'snaibot',
-                            'server': 'irc.rizon.net',
-                            'channels': '#ircbottest'}
+        config['SERVER'] = {'botName': '',
+                            'server': '',
+                            'channels': '',
+                            'password':''}
         
         config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                        'Number of kicks before channel ban': '3',
-                                       'Naughty words':'fuck, cunt, shit, faggot, f4gg0t,f4ggot,f4g,dick,d1ck,d1ckhead,dickhead,cocksucker,pussy,motherfucker,muthafucker,muthafucka,fucker,fucking,fuckin,fuckhead,fuckface'}
+                                       'Naughty words':'fuck,cunt,shit,faggot, f4gg0t,f4ggot,f4g,dick,d1ck,d1ckhead,dickhead,cocksucker,pussy,motherfucker,muthafucker,muthafucka,fucker,fucking,fuckin,fuckhead,fuckface'}
         
         config['Keyword Links'] = {'wiki':'http://ftbwiki.org/Feed_The_Beast_Wiki',
                                    'forum':'http://ftbforums.org/',
@@ -50,7 +51,8 @@ def tryBuildConfig():
                                    'changes':'http://ftbwiki.org/Special:RecentChanges',
                                    'reddit':'http://www.reddit.com/r/feedthebeast/',
                                    'nocache':'http://nocache.ftbwiki.org/Special:UserLogin',
-                                   'vote':'http://ftbwiki.org/Feed_The_Beast_Wiki:Votes_for_Featured_Articles'}
+                                   'vote':'http://ftbwiki.org/Feed_The_Beast_Wiki:Votes_for_Featured_Articles',
+                                   'snaibot':'I was built by snaiperskaya for the good of all mankind... and ostPavel.... Yeah...'}
         
         config['NEWS'] = {'News Item':'*Insert Useful News Here*'}
         
@@ -89,6 +91,8 @@ def spamFilter(msg, channel, nick, client, msgMatch):
         tryOPVoice = opsListBuilder(channel)
         
         if nick not in tryOPVoice:
+            
+            msg = msg.lower()
         
             numTilKick = int(config['KICK/BAN Settings']['number of repeat messages before kick']) - 1
             numTilBan = int(config['KICK/BAN Settings']['number of kicks before channel ban'])
@@ -125,7 +129,8 @@ def languageKicker(msg, channel, nick, client, msgMatch):
         tryOPVoice = opsListBuilder(channel)
         
         if nick not in tryOPVoice:    
-    
+            
+            msg = msg.lower()
             words = confListParser(config['KICK/BAN Settings']['Naughty words'])
             msglist = msg.split()
             
@@ -212,10 +217,13 @@ if __name__ == '__main__':
     snaibot = pythonircbot.Bot(config['SERVER']['botName'])
     snaibot.connect(config['SERVER']['server'], verbose = True)
     
-    time.sleep(10)
+    time.sleep(20)
+    
+    snaibot.sendMsg('NickServ','IDENTIFY ' + config['SERVER']['password'])
     
     for channel in confListParser(config['SERVER']['channels']):
         snaibot.joinChannel(channel)
+        print(snaibot._channels)
     
     microLog = {}
     microLogSwear = {}
