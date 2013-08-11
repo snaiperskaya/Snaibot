@@ -131,6 +131,7 @@ def languageKicker(msg, channel, nick, client, msgMatch):
         if nick not in tryOPVoice:    
             
             msg = msg.lower()
+            msg = msg.strip('.,!?/@#$^:;*&()\\')
             words = confListParser(config['KICK/BAN Settings']['Naughty words'])
             msglist = msg.split()
             
@@ -216,6 +217,8 @@ if __name__ == '__main__':
     
     snaibot = pythonircbot.Bot(config['SERVER']['botName'])
     snaibot.connect(config['SERVER']['server'], verbose = True)
+    
+    os.system("title {} on {} in channels: {}".format(config['SERVER']['botName'], config['SERVER']['server'], config['SERVER']['channels'].replace(',', ', ')))
     
     time.sleep(20)
     
