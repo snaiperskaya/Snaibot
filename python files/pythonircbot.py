@@ -157,7 +157,10 @@ class _BotReceiveThread(threading.Thread):
 			
 			for line in lines:
 				if self._verbose:
-					print("RECV: ", line)
+					try:
+						print("RECV: ", line)
+					except:
+						print("Error processing character")
 				
 				if self._privMsg(line):
 					continue
