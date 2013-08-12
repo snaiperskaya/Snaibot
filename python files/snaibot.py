@@ -170,40 +170,41 @@ def showMeLinks(msg, channel, nick, client, msgMatch):
     tryBuildConfig()
     
     testmsg = msg.lower()
-    
-    if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options':
-        toSend = '.help, .commands, .options, .news'
-        for i in config.options('Keyword Links'):
-            toSend = toSend + ', .' + i
-        snaibot.sendMsg(channel, nick + ": " + toSend)
-    
-    elif testmsg.split()[0] == '.news':
-        try:
-            if testmsg.split()[1] == 'edit':
-                tryOPVoice = opsListBuilder(channel)
-                if nick in tryOPVoice:
-                    news = ''
-                    for i in msg.split()[2:]:
-                        news = news + ' ' + i
-                    config['NEWS']['News Item'] = news[1:]
-                    with open('settings.ini', 'w') as configfile:
-                        config.write(configfile)
-                    snaibot.sendMsg(channel, 'News Updated in Config!')
-                        
-                else:
-                    snaibot.sendMsg(channel, config['NEWS']['News Item'])
-        except:
-            snaibot.sendMsg(channel, config['NEWS']['News Item'])
-    
-    elif testmsg[0] == '.':
-        
-        try:
-            toSend = config['Keyword Links'][msg[1:]]
+    try:
+        if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options':
+            toSend = '.help, .commands, .options, .news'
+            for i in config.options('Keyword Links'):
+                toSend = toSend + ', .' + i
             snaibot.sendMsg(channel, nick + ": " + toSend)
+        
+        elif testmsg.split()[0] == '.news':
+            try:
+                if testmsg.split()[1] == 'edit':
+                    tryOPVoice = opsListBuilder(channel)
+                    if nick in tryOPVoice:
+                        news = ''
+                        for i in msg.split()[2:]:
+                            news = news + ' ' + i
+                        config['NEWS']['News Item'] = news[1:]
+                        with open('settings.ini', 'w') as configfile:
+                            config.write(configfile)
+                        snaibot.sendMsg(channel, 'News Updated in Config!')
+                            
+                    else:
+                        snaibot.sendMsg(channel, config['NEWS']['News Item'])
+            except:
+                snaibot.sendMsg(channel, config['NEWS']['News Item'])
+        
+        elif testmsg[0] == '.':
             
-        except:
-            return
-
+            try:
+                toSend = config['Keyword Links'][msg[1:]]
+                snaibot.sendMsg(channel, nick + ": " + toSend)
+                
+            except:
+                return
+    except:
+        return
 
 
 if __name__ == '__main__':
