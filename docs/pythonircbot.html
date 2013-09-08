@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module pythonircbot</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>pythonircbot</strong></big></big> (version 1.1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///F:/programming%20projects/snaibot/refactored%20snaibot/pythonircbot.py">f:\programming projects\snaibot\refactored snaibot\pythonircbot.py</a></font></td></tr></table>
+    <p><tt>Easily&nbsp;create&nbsp;IRC&nbsp;bots&nbsp;in&nbsp;Python<br>
+&nbsp;<br>
+Module&nbsp;providing&nbsp;an&nbsp;easy&nbsp;interface&nbsp;to&nbsp;create&nbsp;IRC&nbsp;bots.<br>
+Uses&nbsp;regexes&nbsp;in&nbsp;combination&nbsp;with&nbsp;an&nbsp;event-like&nbsp;system<br>
+to&nbsp;handle&nbsp;messages,&nbsp;and&nbsp;abstracts&nbsp;many&nbsp;IRC&nbsp;commands.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="copy.html">copy</a><br>
+<a href="queue.html">queue</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="socket.html">socket</a><br>
+</td><td width="25%" valign=top><a href="threading.html">threading</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="pythonircbot.html#Bot">Bot</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Bot">class <strong>Bot</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Bot-__init__"><strong>__init__</strong></a>(self, nickname)</dt><dd><tt>Creates&nbsp;bot&nbsp;with&nbsp;nick&nbsp;as&nbsp;nickname<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;nickname:&nbsp;Nickname&nbsp;of&nbsp;the&nbsp;bot</tt></dd></dl>
+
+<dl><dt><a name="Bot-addMsgHandler"><strong>addMsgHandler</strong></a>(self, function, message<font color="#909090">='.*'</font>, channel<font color="#909090">='.*'</font>, nickname<font color="#909090">='.*'</font>, client<font color="#909090">='.*'</font>, messageFlags<font color="#909090">=0</font>, channelFlags<font color="#909090">=0</font>, nicknameFlags<font color="#909090">=0</font>, clientFlags<font color="#909090">=0</font>, thread<font color="#909090">=True</font>)</dt><dd><tt>Adds&nbsp;a&nbsp;function&nbsp;to&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;received&nbsp;message.<br>
+Please&nbsp;keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;the&nbsp;functions&nbsp;are&nbsp;all&nbsp;executed&nbsp;concurrently.<br>
+Returns&nbsp;a&nbsp;function&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;remove&nbsp;the&nbsp;handler&nbsp;again&nbsp;with&nbsp;<a href="#Bot-removeMsgHandler">removeMsgHandler</a>().<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;function:&nbsp;The&nbsp;function&nbsp;that&nbsp;should&nbsp;be&nbsp;called<br>
+-&nbsp;message:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;message.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;channel:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;channel.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;nickname:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;nickname.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;client:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;client.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;messageFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;message&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;channelFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;channel&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;nicknameFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;nickname&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;clientFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;client&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;thread:&nbsp;Execute&nbsp;function&nbsp;in&nbsp;seperate&nbsp;thread<br>
+&nbsp;<br>
+The&nbsp;function&nbsp;should&nbsp;have&nbsp;5&nbsp;arguments:<br>
+-&nbsp;message:&nbsp;The&nbsp;first&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;message&nbsp;that&nbsp;was&nbsp;received.<br>
+-&nbsp;channel:&nbsp;The&nbsp;second&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;channel&nbsp;the&nbsp;message&nbsp;was&nbsp;sent&nbsp;to.&nbsp;This&nbsp;will&nbsp;be&nbsp;the&nbsp;same&nbsp;as&nbsp;nickname&nbsp;when&nbsp;this&nbsp;was&nbsp;a&nbsp;private&nbsp;message.<br>
+-&nbsp;nickname:&nbsp;The&nbsp;third&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;nickname&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;the&nbsp;message.<br>
+-&nbsp;client:&nbsp;The&nbsp;fourth&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;client&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;this&nbsp;message.<br>
+-&nbsp;message&nbsp;match:&nbsp;Match&nbsp;<a href="builtins.html#object">object</a>&nbsp;(<a href="http://docs.python.org/library/re.html#match-objects">http://docs.python.org/library/re.html#match-objects</a>)&nbsp;of&nbsp;the&nbsp;regex&nbsp;applied&nbsp;to&nbsp;the&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="Bot-banUser"><strong>banUser</strong></a>(self, channel, client)</dt><dd><tt>Ban&nbsp;client&nbsp;from&nbsp;channel<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;the&nbsp;client&nbsp;should&nbsp;be&nbsp;banned&nbsp;from.<br>
+-&nbsp;client:&nbsp;Client&nbsp;to&nbsp;be&nbsp;banned.</tt></dd></dl>
+
+<dl><dt><a name="Bot-connect"><strong>connect</strong></a>(self, host, port<font color="#909090">=6667</font>, verbose<font color="#909090">=True</font>, sleepTime<font color="#909090">=0.8</font>, maxItems<font color="#909090">=10</font>, channels<font color="#909090">=[]</font>)</dt><dd><tt>Connects&nbsp;the&nbsp;bot&nbsp;to&nbsp;a&nbsp;server.&nbsp;Every&nbsp;bot&nbsp;can&nbsp;connect&nbsp;to&nbsp;only&nbsp;one&nbsp;server.<br>
+If&nbsp;you&nbsp;want&nbsp;your&nbsp;bot&nbsp;to&nbsp;be&nbsp;on&nbsp;multiple&nbsp;servers,&nbsp;create&nbsp;multiple&nbsp;<a href="#Bot">Bot</a>&nbsp;objects.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;host:&nbsp;Hostname&nbsp;of&nbsp;the&nbsp;server<br>
+-&nbsp;port:&nbsp;Port&nbsp;the&nbsp;server&nbsp;listens&nbsp;to<br>
+-&nbsp;verbose:&nbsp;If&nbsp;True,&nbsp;prints&nbsp;all&nbsp;the&nbsp;received&nbsp;and&nbsp;sent&nbsp;data<br>
+-&nbsp;sleepTime:&nbsp;Minimum&nbsp;time&nbsp;in&nbsp;seconds&nbsp;between&nbsp;two&nbsp;sent&nbsp;messages&nbsp;(used&nbsp;for&nbsp;flood&nbsp;control)<br>
+-&nbsp;maxItems:&nbsp;Maximum&nbsp;items&nbsp;in&nbsp;the&nbsp;queue.&nbsp;Queue&nbsp;is&nbsp;emptied&nbsp;after&nbsp;this&nbsp;amount&nbsp;is&nbsp;reached.&nbsp;0&nbsp;means&nbsp;unlimited.&nbsp;(used&nbsp;for&nbsp;flood&nbsp;control)<br>
+-&nbsp;channels:&nbsp;Channels&nbsp;to&nbsp;immediately&nbsp;join</tt></dd></dl>
+
+<dl><dt><a name="Bot-disconnect"><strong>disconnect</strong></a>(self, message<font color="#909090">=''</font>)</dt><dd><tt>Disconnects&nbsp;the&nbsp;bot&nbsp;from&nbsp;the&nbsp;server.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;message:&nbsp;Message&nbsp;to&nbsp;show&nbsp;when&nbsp;quitting.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getAops"><strong>getAops</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;the&nbsp;aops&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getHops"><strong>getHops</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;the&nbsp;hops&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getModes"><strong>getModes</strong></a>(self, channel)</dt><dd><tt>Returns&nbsp;the&nbsp;current&nbsp;modes&nbsp;of&nbsp;the&nbsp;bot&nbsp;in&nbsp;the&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;channel&nbsp;you&nbsp;want&nbsp;the&nbsp;modes&nbsp;of</tt></dd></dl>
+
+<dl><dt><a name="Bot-getNames"><strong>getNames</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;users&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getOps"><strong>getOps</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;the&nbsp;ops&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getOwner"><strong>getOwner</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;the&nbsp;Owners&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getTopic"><strong>getTopic</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;topic&nbsp;of&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-getVoices"><strong>getVoices</strong></a>(self, channel)</dt><dd><tt>Gets&nbsp;the&nbsp;nicknames&nbsp;of&nbsp;all&nbsp;the&nbsp;voices&nbsp;in&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Bot-inviteUser"><strong>inviteUser</strong></a>(self, nickname, channel)</dt><dd><tt>Invite&nbsp;user&nbsp;to&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;nickname:&nbsp;Nickname&nbsp;of&nbsp;user&nbsp;to&nbsp;invite.<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;to&nbsp;invite&nbsp;user&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="Bot-joinChannel"><strong>joinChannel</strong></a>(self, channel)</dt><dd><tt>Joins&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name</tt></dd></dl>
+
+<dl><dt><a name="Bot-kickUser"><strong>kickUser</strong></a>(self, channel, client, message<font color="#909090">=''</font>)</dt><dd><tt>Kick&nbsp;a&nbsp;client&nbsp;from&nbsp;the&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;the&nbsp;client&nbsp;should&nbsp;be&nbsp;kicked&nbsp;from.<br>
+-&nbsp;client:&nbsp;Client&nbsp;to&nbsp;be&nbsp;kicked.<br>
+-&nbsp;message:&nbsp;Message&nbsp;to&nbsp;kick&nbsp;user&nbsp;with.</tt></dd></dl>
+
+<dl><dt><a name="Bot-partChannel"><strong>partChannel</strong></a>(self, channel)</dt><dd><tt>Parts&nbsp;a&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name</tt></dd></dl>
+
+<dl><dt><a name="Bot-reconnect"><strong>reconnect</strong></a>(self, message<font color="#909090">=''</font>, rejoin<font color="#909090">=True</font>)</dt><dd><tt>Reconnects&nbsp;the&nbsp;bot&nbsp;to&nbsp;the&nbsp;server.&nbsp;Note&nbsp;that&nbsp;this&nbsp;does&nbsp;not&nbsp;reconnect&nbsp;to&nbsp;channels.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;message:&nbsp;Message&nbsp;to&nbsp;show&nbsp;when&nbsp;quitting.<br>
+-&nbsp;rejoin:&nbsp;Rejoin&nbsp;channels</tt></dd></dl>
+
+<dl><dt><a name="Bot-removeMsgHandler"><strong>removeMsgHandler</strong></a>(self, responseFunction)</dt><dd><tt>Remove&nbsp;a&nbsp;function&nbsp;from&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;received&nbsp;message.<br>
+&nbsp;<br>
+Arguments:<br>
+responseFunction:&nbsp;Function&nbsp;that&nbsp;is&nbsp;returned&nbsp;by&nbsp;<a href="#Bot-addMsgHandler">addMsgHandler</a>()</tt></dd></dl>
+
+<dl><dt><a name="Bot-rename"><strong>rename</strong></a>(self, nickname)</dt><dd><tt>Renames&nbsp;the&nbsp;bot.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;nickname:&nbsp;New&nbsp;nickname&nbsp;of&nbsp;the&nbsp;bot</tt></dd></dl>
+
+<dl><dt><a name="Bot-sendMsg"><strong>sendMsg</strong></a>(self, target, message)</dt><dd><tt>Send&nbsp;a&nbsp;message&nbsp;to&nbsp;a&nbsp;channel&nbsp;or&nbsp;user.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;target:&nbsp;Nickname&nbsp;or&nbsp;channel&nbsp;name&nbsp;to&nbsp;send&nbsp;message&nbsp;to.<br>
+-&nbsp;message:&nbsp;Message&nbsp;to&nbsp;send.</tt></dd></dl>
+
+<dl><dt><a name="Bot-sendNotice"><strong>sendNotice</strong></a>(self, target, message)</dt><dd><tt>Send&nbsp;a&nbsp;notice&nbsp;to&nbsp;a&nbsp;channel&nbsp;or&nbsp;user.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;target:&nbsp;Nickname&nbsp;or&nbsp;channel&nbsp;name&nbsp;to&nbsp;send&nbsp;notice&nbsp;to.<br>
+-&nbsp;message:&nbsp;Message&nbsp;to&nbsp;send.</tt></dd></dl>
+
+<dl><dt><a name="Bot-setAway"><strong>setAway</strong></a>(self, message<font color="#909090">=''</font>)</dt><dd><tt>Sets&nbsp;the&nbsp;bot&nbsp;to&nbsp;away.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;message:&nbsp;Away&nbsp;message</tt></dd></dl>
+
+<dl><dt><a name="Bot-setBack"><strong>setBack</strong></a>(self)</dt><dd><tt>Sets&nbsp;the&nbsp;bot&nbsp;to&nbsp;back&nbsp;(after&nbsp;previously&nbsp;having&nbsp;been&nbsp;set&nbsp;to&nbsp;away).</tt></dd></dl>
+
+<dl><dt><a name="Bot-setChannelTopic"><strong>setChannelTopic</strong></a>(self, channel, topic)</dt><dd><tt>Sets&nbsp;the&nbsp;topic&nbsp;of&nbsp;the&nbsp;channel.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;channel:&nbsp;Channel&nbsp;name.<br>
+-&nbsp;topic:&nbsp;Message&nbsp;to&nbsp;change&nbsp;the&nbsp;topic&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="Bot-setMode"><strong>setMode</strong></a>(self, channel, target, flag)</dt><dd><tt>Sets&nbsp;a&nbsp;user/channel&nbsp;flag.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;target:&nbsp;Channel&nbsp;or&nbsp;nickname&nbsp;of&nbsp;user&nbsp;to&nbsp;set&nbsp;the&nbsp;flag&nbsp;of<br>
+-&nbsp;flag:&nbsp;Flag&nbsp;(and&nbsp;optional&nbsp;arguments)&nbsp;to&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Bot-unsetMode"><strong>unsetMode</strong></a>(self, target, flag)</dt><dd><tt>Unsets&nbsp;a&nbsp;user/channel&nbsp;flag.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;target:&nbsp;Channel&nbsp;or&nbsp;nickname&nbsp;of&nbsp;user&nbsp;to&nbsp;set&nbsp;the&nbsp;flag&nbsp;of<br>
+-&nbsp;flag:&nbsp;Flag&nbsp;(and&nbsp;optional&nbsp;arguments)&nbsp;to&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Bot-waitForDisconnect"><strong>waitForDisconnect</strong></a>(self)</dt><dd><tt>Blocks&nbsp;until&nbsp;the&nbsp;bot&nbsp;has&nbsp;disconnected.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Milan&nbsp;Boers</td></tr></table>
+</body></html>

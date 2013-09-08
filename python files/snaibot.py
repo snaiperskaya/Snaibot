@@ -41,9 +41,7 @@ class snaibot():
                             'language filter':self.languageKicker,
                             'spam filter':self.spamFilter,
                             'news':self.news,
-                            'choose':self.choose}
-                            #'listening':'',
-                            #'speech':''}        
+                            'choose':self.choose}   
         
         self.bot = pythonircbot.Bot(self.config['SERVER']['botName'])
         self.bot.connect(self.config['SERVER']['server'], verbose = True)
@@ -90,7 +88,7 @@ class snaibot():
                                            'Number of kicks before channel ban': '5',
                                            'Naughty words':'fuck,cunt,shit,faggot, f4gg0t,f4ggot,f4g,dick,d1ck,d1ckhead,dickhead,cocksucker,pussy,motherfucker,muthafucker,muthafucka,fucker,fucking,fuckin,fuckhead,fuckface'}
             
-            self.config['Keyword Links'] = {'source':'https://github.com/snaiperskaya/Snaibot/',
+            self.config['Keyword Links'] = {'source':'http://snaiperskaya.github.io/Snaibot',
                                        'snaibot':'I was built by snaiperskaya for the good of all mankind...'}
             
             self.config['Mod Links'] = {'modname':'*link to mod*,*mod version*'}

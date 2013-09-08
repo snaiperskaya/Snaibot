@@ -25,3 +25,6 @@ To Use:
 	
 Requirements:
 	Python 3.0 must be installed (3.3 recommended. 2.7.X may work, but this is untested and unsupported)
+	
+	
+*Limited documentation available in "docs" folder in form of pydocs of classes in snaibot and pythonircbot
