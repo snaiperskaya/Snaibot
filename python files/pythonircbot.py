@@ -397,7 +397,12 @@ class Bot(object):
 		self._connected = False
 		# Connect again
 		if rejoin:
-			self.connect(self._host, self._port, self._verbose, self._sleepTime, self._maxItems, list(self._channels.keys()))
+			chanlist = list(self._channels.keys())
+			self.connect(self._host, self._port, self._verbose, self._sleepTime, self._maxItems)
+			time.sleep(15)
+			for channel in chanlist:
+				self.joinChannel(channel)
+			
 		else:
 			self.connect(self._host, self._port, self._verbose, self._sleepTime, self._maxItems)
 	
