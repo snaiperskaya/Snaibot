@@ -41,7 +41,9 @@ class snaibot():
                             'language filter':self.languageKicker,
                             'spam filter':self.spamFilter,
                             'news':self.news,
-                            'choose':self.choose}   
+                            'choose':self.choose}
+                            #'listening':'',
+                            #'speech':''}        
         
         self.bot = pythonircbot.Bot(self.config['SERVER']['botName'])
         self.bot.connect(self.config['SERVER']['server'], verbose = True)
@@ -88,7 +90,7 @@ class snaibot():
                                            'Number of kicks before channel ban': '5',
                                            'Naughty words':'fuck,cunt,shit,faggot, f4gg0t,f4ggot,f4g,dick,d1ck,d1ckhead,dickhead,cocksucker,pussy,motherfucker,muthafucker,muthafucka,fucker,fucking,fuckin,fuckhead,fuckface'}
             
-            self.config['Keyword Links'] = {'source':'http://snaiperskaya.github.io/Snaibot',
+            self.config['Keyword Links'] = {'source':'https://github.com/snaiperskaya/Snaibot/',
                                        'snaibot':'I was built by snaiperskaya for the good of all mankind...'}
             
             self.config['Mod Links'] = {'modname':'*link to mod*,*mod version*'}
@@ -146,6 +148,10 @@ class snaibot():
                 self.config['Modules'][module] = 'False'
                 with open(self.configfile, 'w') as configfile:
                     self.config.write(configfile)
+
+    def stripped(self, x):
+        '''Helper function for the language filter. Strips extra-extraneous characters from string x and returns it.'''
+        return "".join([i for i in x if ord(i) in range(32, 127)])
                          
     """
     FUNCTIONS FOR MSG HANDLERS. (All must contain arguements for self, msg, channel, nick, client, msgMatch)
@@ -344,7 +350,9 @@ class snaibot():
             if nick not in tryOPVoice:    
                 
                 msg = msg.lower()
+                msg = self.stripped(msg)
                 msg = msg.strip('.,!?/@#$^:;*&()\\')
+                
                 words = self.confListParser(self.config['KICK/BAN Settings']['Naughty words'])
                 msglist = msg.split()
                 

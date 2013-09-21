@@ -83,6 +83,8 @@
 
 <dl><dt><a name="snaibot-spamFilter"><strong>spamFilter</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Parses&nbsp;chat&nbsp;and&nbsp;weeds&nbsp;out&nbsp;repeat&nbsp;lines&nbsp;from&nbsp;a&nbsp;nick&nbsp;as&nbsp;*spam*.&nbsp;Kicks&nbsp;and&nbsp;bans&nbsp;can&nbsp;be&nbsp;issued&nbsp;by&nbsp;an&nbsp;OP'd&nbsp;bot&nbsp;at&nbsp;intervals&nbsp;specified&nbsp;in&nbsp;config.&nbsp;Will&nbsp;ignore&nbsp;OP&nbsp;or&nbsp;Voiced&nbsp;nicks.</tt></dd></dl>
 
+<dl><dt><a name="snaibot-stripped"><strong>stripped</strong></a>(self, x)</dt><dd><tt>Helper&nbsp;function&nbsp;for&nbsp;the&nbsp;language&nbsp;filter.&nbsp;Strips&nbsp;extra-extraneous&nbsp;characters&nbsp;from&nbsp;string&nbsp;x&nbsp;and&nbsp;returns&nbsp;it.</tt></dd></dl>
+
 <dl><dt><a name="snaibot-tryBuildConfig"><strong>tryBuildConfig</strong></a>(self)</dt><dd><tt>Attempts&nbsp;to&nbsp;find&nbsp;the&nbsp;config&nbsp;file.&nbsp;Will&nbsp;load&nbsp;if&nbsp;found&nbsp;or&nbsp;build&nbsp;a&nbsp;default&nbsp;if&nbsp;not&nbsp;found.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-updateModules"><strong>updateModules</strong></a>(self)</dt><dd><tt>NEW&nbsp;TO&nbsp;SNAIBOT&nbsp;3.0:&nbsp;This&nbsp;will&nbsp;form&nbsp;the&nbsp;backbone&nbsp;of&nbsp;the&nbsp;new&nbsp;modular&nbsp;design.&nbsp;This&nbsp;will&nbsp;update&nbsp;the&nbsp;settings&nbsp;from&nbsp;the&nbsp;config&nbsp;and&nbsp;attempt&nbsp;to&nbsp;turn&nbsp;on&nbsp;or&nbsp;off&nbsp;modules&nbsp;based&nbsp;on&nbsp;those&nbsp;settings.&nbsp;If&nbsp;a&nbsp;module&nbsp;is&nbsp;not&nbsp;properly&nbsp;marked&nbsp;as&nbsp;true&nbsp;or&nbsp;false&nbsp;in&nbsp;the&nbsp;config,&nbsp;it&nbsp;will&nbsp;set&nbsp;it&nbsp;to&nbsp;false&nbsp;automatically.</tt></dd></dl>
