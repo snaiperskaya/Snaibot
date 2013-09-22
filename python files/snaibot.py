@@ -351,16 +351,16 @@ class snaibot():
                 
                 msg = msg.lower()
                 msg = self.stripped(msg)
-                msg = msg.strip('.,!?/@#$^:;*&()\\')
+                msg = msg.strip('.,!?/@#$^:;*&()\\ -_')
                 
                 words = self.confListParser(self.config['KICK/BAN Settings']['Naughty words'])
-                msglist = msg.split()
+                #msglist = msg.split()
                 
                 numTilKick = 1
                 numTilBan = int(self.config['KICK/BAN Settings']['number of kicks before channel ban'])    
                 
                 for i in words:
-                    if i in msglist:
+                    if i in msg:
                         if channel not in self.microSwearLog:
                             self.microSwearLog[channel] = {client:[1, 0]}
                             self.bot.sendMsg(channel, nick + ": Please watch your language...")
