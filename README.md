@@ -10,6 +10,7 @@ Snaibot currently has the following features available:
 	- Show MC Mod info
 	- "Choose"
 	- News Item
+	- In-IRC Basic Administration
 	
 All run from a config file, which can be live-updated to turn modules on and off and items like links can be added to or modified without pulling the bot down.
 

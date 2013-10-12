@@ -1,3 +1,5 @@
+#!python3
+
 #    This version is a heavy re-write and port from Python 2 -> Python 3 by
 #    snaiperskaya (C.S.Putnam) for use with the snaibot moderation bot.
 #    This will be distributed alongside snaibot.py to enable it's features
@@ -292,7 +294,7 @@ class _BotReceiveThread(threading.Thread):
 			return "continue"
 
 class Bot(object):
-	def __init__(self, nickname):
+	def __init__(self, nickname, password=''):
 		"""
 		Creates bot with nick as nickname
 		
@@ -300,6 +302,7 @@ class Bot(object):
 		- nickname: Nickname of the bot
 		"""
 		self._nick = nickname
+		self._pass = password
 		
 		self._connected = False
 		self._connecting = False
@@ -361,6 +364,10 @@ class Bot(object):
 			self._receiveThread._userModeUnset.connect(self._userModeUnset)
 			self._receiveThread.start()
 			
+			#Pause then verify Nick
+			time.sleep(5)
+			self.verifyNick(self._pass)
+			
 			# Join initial channels
 			for channel in channels:
 				self.joinChannel(channel)
@@ -399,7 +406,6 @@ class Bot(object):
 		if rejoin:
 			chanlist = list(self._channels.keys())
 			self.connect(self._host, self._port, self._verbose, self._sleepTime, self._maxItems)
-			time.sleep(15)
 			for channel in chanlist:
 				self.joinChannel(channel)
 			
@@ -421,6 +427,16 @@ class Bot(object):
 	"""
 	IRC commands
 	"""
+	def verifyNick(self, password):
+		"""
+		Sends password to NickServ to verify nickname.
+		
+		Arguments:
+		- password: specifies password to send to NickServ, defaults to self._pass.
+		"""
+		self.sendMsg("NickServ", "IDENTIFY {}".format(password))
+		self._pass = password
+	
 	def rename(self, nickname):
 		"""
 		Renames the bot.
@@ -508,9 +524,9 @@ class Bot(object):
 		- target: Channel or nickname of user to set the flag of
 		- flag: Flag (and optional arguments) to set
 		"""
-		self._s._send("MODE {} {} +{}".format(channel, target, flag))
+		self._s._send("MODE {} +{} {}".format(channel, flag, target))
 	
-	def unsetMode(self, target, flag):
+	def unsetMode(self, channel, target, flag):
 		"""
 		Unsets a user/channel flag.
 		
@@ -518,7 +534,7 @@ class Bot(object):
 		- target: Channel or nickname of user to set the flag of
 		- flag: Flag (and optional arguments) to set
 		"""
-		self._s._send("MODE {} -{}".format(target, flag))
+		self._s._send("MODE {} -{} {}".format(channel, flag, target))
 	
 	def inviteUser(self, nickname, channel):
 		"""

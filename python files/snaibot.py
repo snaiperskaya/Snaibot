@@ -1,3 +1,5 @@
+#!python3
+
 #    snaibot, Python 3-based IRC utility bot
 #    Copyright (C) 2013  C.S.Putnam
 #
@@ -31,7 +33,7 @@ class snaibot():
         
         self.config = configparser.ConfigParser()
         self.configfile = configfile
-        self.tryBuildConfig()
+        self.tryBuildConfig(True)
         self.microLog = {}
         self.modulestate = {}
         
@@ -41,18 +43,17 @@ class snaibot():
                             'language filter':self.languageKicker,
                             'spam filter':self.spamFilter,
                             'news':self.news,
-                            'choose':self.choose}
+                            'choose':self.choose,
+                            'admin':self.remoteAdmin}
                             #'listening':'',
                             #'speech':''}        
         
-        self.bot = pythonircbot.Bot(self.config['SERVER']['botName'])
+        self.bot = pythonircbot.Bot(self.config['SERVER']['botName'], self.config['SERVER']['password'])
         self.bot.connect(self.config['SERVER']['server'], verbose = True)
         
         os.system("title {} on {} in channels: {}".format(self.config['SERVER']['botName'], self.config['SERVER']['server'], self.config['SERVER']['channels'].replace(',', ', ')))
         
         time.sleep(int(self.config['SERVER']['timeout']))
-        
-        self.bot.sendMsg('NickServ','IDENTIFY ' + self.config['SERVER']['password'])
         
         for channel in self.confListParser(self.config['SERVER']['channels']):
             self.bot.joinChannel(channel)
@@ -61,30 +62,31 @@ class snaibot():
         self.microLog = {}
         self.microSwearLog = {}
         
+        self.updateModules()
+        
         self.bot.addMsgHandler(self.help)
         
         self.bot.waitForDisconnect()
         
         
-    def tryBuildConfig(self):
+    def tryBuildConfig(self, firstRun = False):
         '''Attempts to find the config file. Will load if found or build a default if not found.'''
         
-        if not os.path.exists(self.configfile):
-            print('Building Default settings.ini file...')
-            
+        if firstRun == True:
             self.config['SERVER'] = {'botName': 'snaibot',
-                                'server': '',
-                                'channels': '',
-                                'password':'',
-                                'timeout':'10'}
-            
+                                    'server': '',
+                                    'channels': '',
+                                    'password':'',
+                                    'timeout':'10'}
+                
             self.config['Modules'] = {'Normal Links':'False',
                                     'Secret Links':'False',
                                     'Mod Info':'False',
                                     'Language Filter':'False',
                                     'Spam Filter':'False',
                                     'News':'False',
-                                    'Choose':'False'}
+                                    'Choose':'False',
+                                    'Admin':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -99,31 +101,62 @@ class snaibot():
             
             self.config['NEWS'] = {'News Item':'*Insert Useful News Here*'}
             
+            self.config['Admin'] = {'Admin Nicks':'snaiperskaya'}
+        
+        if not os.path.exists(self.configfile):
+            print('Building Default settings.ini file...')
+                      
             with open(self.configfile, 'w') as confile:
                 self.config.write(confile)
+                confile.close()
             print('Basic settings.ini file built. Please configure and restart bot...')
+            
         else:
-            print('Config File found!')
             self.config.read(self.configfile)
+            if firstRun == True:
+                with open(self.configfile, 'w') as confile:
+                    self.config.write(confile)
+                    confile.close()
+            print('Config File found and updated!')
             
             
     def confListParser(self, configList):
         '''Micro function to convert a comma-separated String into a usable list. Used for parsing lists entered into settings file.'''
         
-        l = configList.strip(' ').split(',')
+        l = configList.replace(' ','').split(',')
         return l
     
-    
-    def opsListBuilder(self, channel):
-        '''Scans the channel and returns a set containing all people with elevated privledges in the channel specified. Currently includes those with Voice, but this may be spun off in future to accommodate new features.'''
-        
+    def opsListBuilder(self, channel, level = 'o'):
+        '''Scans the channel and returns a set containing all people with elevated privledges in the channel specified. Level allows specification of minimum priledge level to include. Default will be "o" (OPS+), but other options will be "v" (Voice+), "h" (HOPS+), "a" (AOPS+), and "own" (Owner only). Note that some servers only consider some of these (some only use OP and Voice, in which case use of "h" would still only include Voice).'''
+        lev = level.lower()
         namelist = set()
-        namelist.update(self.bot.getVoices(channel))
-        namelist.update(self.bot.getHops(channel))
-        namelist.update(self.bot.getOps(channel))
-        namelist.update(self.bot.getAops(channel))
-        namelist.update(self.bot.getOwner(channel))
-        return namelist
+        if lev not in ['own','a','o','h','v']:
+            lev = 'o' #conditional to force OP+ if level unrecognized
+        
+        if lev == 'v':
+            namelist.update(self.bot.getVoices(channel))
+            namelist.update(self.bot.getHops(channel))
+            namelist.update(self.bot.getOps(channel))
+            namelist.update(self.bot.getAops(channel))
+            namelist.update(self.bot.getOwner(channel))
+        elif lev == 'h':
+            namelist.update(self.bot.getHops(channel))
+            namelist.update(self.bot.getOps(channel))
+            namelist.update(self.bot.getAops(channel))
+            namelist.update(self.bot.getOwner(channel))
+        elif lev == 'o':
+            namelist.update(self.bot.getOps(channel))
+            namelist.update(self.bot.getAops(channel))
+            namelist.update(self.bot.getOwner(channel))
+        elif lev == 'a':
+            namelist.update(self.bot.getAops(channel))
+            namelist.update(self.bot.getOwner(channel))
+        elif lev == 'own':
+            namelist.update(self.bot.getOwner(channel))
+        
+        print(namelist)
+        return namelist    
+    
     
     def updateModules(self):
         '''NEW TO SNAIBOT 3.0: This will form the backbone of the new modular design. This will update the settings from the config and attempt to turn on or off modules based on those settings. If a module is not properly marked as true or false in the config, it will set it to false automatically.'''
@@ -148,6 +181,7 @@ class snaibot():
                 self.config['Modules'][module] = 'False'
                 with open(self.configfile, 'w') as configfile:
                     self.config.write(configfile)
+                    configfile.close()
 
     def stripped(self, x):
         '''Helper function for the language filter. Strips extra-extraneous characters from string x and returns it.'''
@@ -171,30 +205,30 @@ class snaibot():
         self.updateModules()
         testmsg = msg.lower()
         modules = self.config['Modules']
-        if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options':
-            toSend = '.commands'
+        if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options' or testmsg == '*commands'or testmsg == '*options' or testmsg == '*help':
+            toSend = '*commands, *help'
             
             if modules['News'].lower() == 'true':
-                toSend = toSend + ', .news'
+                toSend = toSend + ', *news'
                 
             if modules['Mod Info'].lower() == 'true':
-                toSend = toSend + ', .mods'  
+                toSend = toSend + ', *mods'
                 
             if modules['Normal Links'].lower() == 'true':
                 for i in self.config.options('Keyword Links'):
-                    toSend = toSend + ', .' + i
+                    toSend = toSend + ', *' + i
                     
             if modules['Choose'].lower() == 'true':
-                toSend = toSend + ', .choose'             
+                toSend = toSend + ', *choose'
             
             self.bot.sendMsg(channel, nick + ": " + toSend)            
     
 
     def news(self, msg, channel, nick, client, msgMatch):
-        '''Module and reading and editing latest news story. Edit only available to OP/Voice+.'''
+        '''Module and reading and editing latest news story. Edit only available to OP+.'''
         
         testmsg = msg.lower()
-        if testmsg.split()[0] == '.news':
+        if testmsg.split()[0] == '*news':
             try:
                 if testmsg.split()[1] == 'edit':
                     tryOPVoice = self.opsListBuilder(channel)
@@ -205,12 +239,13 @@ class snaibot():
                         self.config['NEWS']['News Item'] = news[1:]
                         with open(self.configfile, 'w') as configfile:
                             self.config.write(configfile)
+                            configfile.close()
                         self.bot.sendMsg(channel, 'News Updated in Config!')
                             
                     else:
                         self.bot.sendMsg(channel, self.config['NEWS']['News Item'])
             except:
-                self.bot.sendMsg(channel, self.config['NEWS']['News Item'])        
+                self.bot.sendMsg(channel, self.config.get('NEWS','News Item'))        
         
 
     def showNormalLinks(self, msg, channel, nick, client, msgMatch):
@@ -218,7 +253,7 @@ class snaibot():
         
         testmsg = msg.lower()
         try:
-            if testmsg[0] == '.':
+            if testmsg[0] == '*':
                     toSend = self.config['Keyword Links'][testmsg[1:]]
                     self.bot.sendMsg(channel, nick + ": " + toSend)
         except:
@@ -243,7 +278,7 @@ class snaibot():
         testmsg = msg.lower().split(' ')
         
         try:
-            if testmsg[0] == '.mod' or testmsg[0] == '.mods':
+            if testmsg[0] == '*mod' or testmsg[0] == '*mods':
                 toSend = ''
                 modlist = []
                 for i in self.config.options('Mod Links'):
@@ -255,19 +290,19 @@ class snaibot():
                 while count < numsends:
                     toSend = modlist[place]
                     for i in modlist[place + 1:place + 19]:
-                        toSend = toSend + ', .' + i
+                        toSend = toSend + ', *' + i
                     self.bot.sendMsg(nick,toSend)
                     place = place + 20
                     count = count + 1
                 toSend = modlist[place]
                 try:
                     for i in modlist[place + 1:]:
-                        toSend = toSend + ', .' + i
+                        toSend = toSend + ', *' + i
                 except:
                     pass
                 self.bot.sendMsg(nick,toSend)
                 
-            elif testmsg[0][0] == '.':
+            elif testmsg[0][0] == '*':
                     
                     try:
                         toSend = self.config['Mod Links'][testmsg[0][1:]]
@@ -288,9 +323,9 @@ class snaibot():
         '''Takes a string of arguments from chat that are ;-separated and picks one at random.'''
         
         testmsg = msg.lower()
-        if testmsg[:7] == '.choose':
+        if testmsg[:7] == '*choose':
             try:
-                toParse = testmsg[7:].rstrip().lstrip()
+                toParse = msg[7:].rstrip().lstrip()
                 parList = toParse.split(';')
                 final = []
                 for item in parList:
@@ -306,7 +341,7 @@ class snaibot():
         
         if channel.upper() in self.bot._channels:
             
-            tryOPVoice = self.opsListBuilder(channel)
+            tryOPVoice = self.opsListBuilder(channel,'v')
             
             if nick not in tryOPVoice:
                 
@@ -345,7 +380,7 @@ class snaibot():
         
         if channel.upper() in self.bot._channels:
             
-            tryOPVoice = self.opsListBuilder(channel)
+            tryOPVoice = self.opsListBuilder(channel,'v')
             
             if nick not in tryOPVoice:    
                 
@@ -376,11 +411,95 @@ class snaibot():
                             self.microSwearLog[channel][client][1] = 0
                             
                         elif self.microSwearLog[channel][client][0] >= numTilKick:
+                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
                             self.bot.kickUser(channel, nick, 'Swearing (bot)')
                             self.microSwearLog[channel][client][0] = numTilKick - 1
                             self.microSwearLog[channel][client][1] = self.microSwearLog[channel][client][1] + 1
                             
                         else:
                             self.microSwearLog[channel][client][0] = self.microSwearLog[channel][client][0] + 1
+                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
                             
                         break
+                    
+    def remoteAdmin(self, msg, channel, nick, client, msgMatch):
+        '''Module to allow command-based administration via chat from those either registered as admins in the config or those with OP+'''
+        
+        testmsg = msg.lower()
+        configAdmin = self.confListParser(self.config['Admin']['Admin Nicks'])
+        try:
+            if channel.upper() in self.bot._channels:
+                chanOPList = self.opsListBuilder(channel)
+                if self.bot._nick in chanOPList:
+                    if nick in configAdmin or nick in chanOPList:
+                        if testmsg == '*admin':
+                            self.bot.sendMsg(nick, 'The following administrative commands are available in {}: Set modes (*v <nick>, *h <nick>, *o <nick>), Un-set Modes (*dv <nick>, *dh <nick>, *do <nick>), *kick <nick>, *join <channel>, *leave <channel>, *identify'.format(channel))     
+                        elif testmsg == '*identify':
+                            self.bot.verifyNick(self.config['SERVER']['password'])
+                        elif testmsg.split()[0] == '*join':
+                            chan = testmsg.split()[1]
+                            if chan[0] == '#':
+                                self.bot.joinChannel(chan)
+                            else:
+                                self.bot.sendMsg(nick, 'Not a valid channel...')
+                        elif testmsg.split()[0] == '*leave':
+                            chan = testmsg.split()[1]
+                            if chan[0] == '#':
+                                self.bot.partChannel(chan)
+                            else:
+                                self.bot.sendMsg(nick, 'Not a valid channel...')
+                        elif testmsg.split()[0] == '*kick':
+                            self.bot.kickUser(channel, testmsg.split()[1], 'Requested by {}'.format(nick))
+                        elif testmsg.split()[0] == '*v':
+                            self.bot.setMode(channel, testmsg.split()[1], 'v')
+                        elif testmsg.split()[0] == '*h':
+                            self.bot.setMode(channel, testmsg.split()[1], 'h')
+                        elif testmsg.split()[0] == '*o':
+                            self.bot.setMode(channel, testmsg.split()[1], 'o')
+                        elif testmsg.split()[0] == '*dv':
+                            self.bot.unsetMode(channel, testmsg.split()[1], 'v')
+                        elif testmsg.split()[0] == '*dh':
+                            self.bot.unsetMode(channel, testmsg.split()[1], 'h')
+                        elif testmsg.split()[0] == '*do':
+                            self.bot.unsetMode(channel, testmsg.split()[1], 'o')                        
+                            
+                else:
+                    if testmsg == '*admin':
+                        self.bot.sendMsg(nick, 'Bot not OPed in {}! The following administrative commands are available: *join <channel>, *leave <channel>, *identify'.format(channel))
+                    elif testmsg == '*identify':
+                        self.bot.verifyNick(self.config['SERVER']['password'])
+                    elif testmsg.split()[0] == '*join':
+                        chan = testmsg.split()[1]
+                        if chan[0] == '#':
+                            self.bot.joinChannel(chan)
+                        else:
+                            self.bot.sendMsg(nick, 'Not a valid channel...')
+                    elif testmsg.split()[0] == '*leave':
+                        chan = testmsg.split()[1]
+                        if chan[0] == '#':
+                            self.bot.partChannel(chan)
+                        else:
+                            self.bot.sendMsg(nick, 'Not a valid channel...')                 
+            
+            else:
+                if nick in configAdmin:
+                    if testmsg == '*admin':
+                        self.bot.sendMsg(nick, 'The following administrative commands are available: *join <channel>, *leave <channel>, *identify')
+                    elif testmsg == '*identify':
+                        self.bot.verifyNick(self.config['SERVER']['password'])
+                    elif testmsg.split()[0] == '*join':
+                        chan = testmsg.split()[1]
+                        if chan[0] == '#':
+                            self.bot.joinChannel(chan)
+                        else:
+                            self.bot.sendMsg(nick, 'Not a valid channel...')
+                    elif testmsg.split()[0] == '*leave':
+                        chan = testmsg.split()[1]
+                        if chan[0] == '#':
+                            self.bot.partChannel(chan)
+                        else:
+                            self.bot.sendMsg(nick, 'Not a valid channel...')
+                            
+        except:
+            pass
+    

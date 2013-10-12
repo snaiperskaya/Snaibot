@@ -50,7 +50,7 @@ to&nbsp;handle&nbsp;messages,&nbsp;and&nbsp;abstracts&nbsp;many&nbsp;IRC&nbsp;co
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Bot-__init__"><strong>__init__</strong></a>(self, nickname)</dt><dd><tt>Creates&nbsp;bot&nbsp;with&nbsp;nick&nbsp;as&nbsp;nickname<br>
+<dl><dt><a name="Bot-__init__"><strong>__init__</strong></a>(self, nickname, password<font color="#909090">=''</font>)</dt><dd><tt>Creates&nbsp;bot&nbsp;with&nbsp;nick&nbsp;as&nbsp;nickname<br>
 &nbsp;<br>
 Arguments:<br>
 -&nbsp;nickname:&nbsp;Nickname&nbsp;of&nbsp;the&nbsp;bot</tt></dd></dl>
@@ -210,11 +210,16 @@ Arguments:<br>
 -&nbsp;target:&nbsp;Channel&nbsp;or&nbsp;nickname&nbsp;of&nbsp;user&nbsp;to&nbsp;set&nbsp;the&nbsp;flag&nbsp;of<br>
 -&nbsp;flag:&nbsp;Flag&nbsp;(and&nbsp;optional&nbsp;arguments)&nbsp;to&nbsp;set</tt></dd></dl>
 
-<dl><dt><a name="Bot-unsetMode"><strong>unsetMode</strong></a>(self, target, flag)</dt><dd><tt>Unsets&nbsp;a&nbsp;user/channel&nbsp;flag.<br>
+<dl><dt><a name="Bot-unsetMode"><strong>unsetMode</strong></a>(self, channel, target, flag)</dt><dd><tt>Unsets&nbsp;a&nbsp;user/channel&nbsp;flag.<br>
 &nbsp;<br>
 Arguments:<br>
 -&nbsp;target:&nbsp;Channel&nbsp;or&nbsp;nickname&nbsp;of&nbsp;user&nbsp;to&nbsp;set&nbsp;the&nbsp;flag&nbsp;of<br>
 -&nbsp;flag:&nbsp;Flag&nbsp;(and&nbsp;optional&nbsp;arguments)&nbsp;to&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Bot-verifyNick"><strong>verifyNick</strong></a>(self, password)</dt><dd><tt>Sends&nbsp;password&nbsp;to&nbsp;NickServ&nbsp;to&nbsp;verify&nbsp;nickname.<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;password:&nbsp;specifies&nbsp;password&nbsp;to&nbsp;send&nbsp;to&nbsp;NickServ,&nbsp;defaults&nbsp;to&nbsp;self.<strong>_pass</strong>.</tt></dd></dl>
 
 <dl><dt><a name="Bot-waitForDisconnect"><strong>waitForDisconnect</strong></a>(self)</dt><dd><tt>Blocks&nbsp;until&nbsp;the&nbsp;bot&nbsp;has&nbsp;disconnected.</tt></dd></dl>
 
