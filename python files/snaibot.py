@@ -44,7 +44,8 @@ class snaibot():
                             'spam filter':self.spamFilter,
                             'news':self.news,
                             'choose':self.choose,
-                            'admin':self.remoteAdmin}
+                            'admin':self.remoteAdmin,
+                            'wiki':self.searchWiki}
                             #'listening':'',
                             #'speech':''}        
         
@@ -86,7 +87,8 @@ class snaibot():
                                     'Spam Filter':'False',
                                     'News':'False',
                                     'Choose':'False',
-                                    'Admin':'False'}
+                                    'Admin':'False',
+                                    'Wiki':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -502,4 +504,25 @@ class snaibot():
                             
         except:
             pass
-    
+        
+    def searchWiki(self, msg, channel, nick, client, msgMatch):
+        testmsg = msg.lower()
+        #try:
+        if testmsg[:8] == '*ftbwiki':
+            toParse = testmsg[8:].rstrip().lstrip()
+            parList = toParse.split(' ')
+            if parList[0] != '':
+                term1 = parList.pop(0)
+                term1 = term1[:1].upper() + term1[1:]
+                searchTerm = term1
+                instantURL = term1
+                for i in parList:
+                    term = i
+                    term = term[:1].upper() + term[1:]
+                    searchTerm = searchTerm + '+' + term
+                    instantURL = instantURL + '_' + term
+                searchURL = 'http://ftbwiki.org/index.php?search=' + searchTerm
+                fullURL = 'http://ftbwiki.org/' + instantURL
+                self.bot.sendMsg(channel, nick + ": Try this link: " + fullURL + ' or click here for full search results: ' + searchURL + '&fulltext=1')
+        #except:
+            #pass 
