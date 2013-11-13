@@ -221,7 +221,10 @@ class snaibot():
                     toSend = toSend + ', *' + i
                     
             if modules['Choose'].lower() == 'true':
-                toSend = toSend + ', *choose'
+                toSend = toSend + ', *choose <opt1;opt2;etc>'
+                
+            if modules['Wiki'].lower() == 'true':
+                toSend = toSend + ', *ftbwiki <searchterm>'            
             
             self.bot.sendMsg(channel, nick + ": " + toSend)            
     
@@ -230,13 +233,13 @@ class snaibot():
         '''Module and reading and editing latest news story. Edit only available to OP+.'''
         
         testmsg = msg.lower()
-        if testmsg.split()[0] == '*news':
+        if testmsg.split(' ')[0] == '*news':
             try:
-                if testmsg.split()[1] == 'edit':
+                if testmsg.split(' ')[1] == 'edit':
                     tryOPVoice = self.opsListBuilder(channel)
                     if nick in tryOPVoice:
                         news = ''
-                        for i in msg.split()[2:]:
+                        for i in msg.split(' ')[2:]:
                             news = news + ' ' + i
                         self.config['NEWS']['News Item'] = news[1:]
                         with open(self.configfile, 'w') as configfile:
@@ -506,10 +509,10 @@ class snaibot():
             pass
         
     def searchWiki(self, msg, channel, nick, client, msgMatch):
+        '''Module allows for searching FTBWiki.org for articles. Bot is largely used for a Minecraft Community, so this was extremely helpful as a resource.'''
         testmsg = msg.lower()
-        #try:
         if testmsg[:8] == '*ftbwiki':
-            toParse = testmsg[8:].rstrip().lstrip()
+            toParse = msg[8:].rstrip().lstrip()
             parList = toParse.split(' ')
             if parList[0] != '':
                 term1 = parList.pop(0)
@@ -524,5 +527,3 @@ class snaibot():
                 searchURL = 'http://ftbwiki.org/index.php?search=' + searchTerm
                 fullURL = 'http://ftbwiki.org/' + instantURL
                 self.bot.sendMsg(channel, nick + ": Try this link: " + fullURL + ' or click here for full search results: ' + searchURL + '&fulltext=1')
-        #except:
-            #pass 
