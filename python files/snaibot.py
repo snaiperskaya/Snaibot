@@ -70,6 +70,19 @@ class snaibot():
         self.bot.waitForDisconnect()
         
         
+    def getTestMsg(self, nick, msg):
+        '''New function to allow parsing of msg from IRC bot for gameserver. Takes a msg and original sending nick and attempts to parse out a message and nick from a CraftIRC bot. Returns a tuple of (nick, lowermsg, origmsg)'''
+        
+        try:
+            splitnick = msg.split('> ')
+            newnick = splitnick[0][1:]
+            newmsg = splitnick[1]
+        except:
+            newnick = nick
+            newmsg = msg
+        return (newnick, newmsg.lower(), newmsg)
+        
+        
     def tryBuildConfig(self, firstRun = False):
         '''Attempts to find the config file. Will load if found or build a default if not found.'''
         
@@ -208,7 +221,10 @@ class snaibot():
         '''Builds help command based on loaded modules. This will always run regardless of other modules loaded.'''
         
         self.updateModules()
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         modules = self.config['Modules']
         if testmsg == '.help' or testmsg == '.commands' or testmsg == '.options' or testmsg == '*commands'or testmsg == '*options' or testmsg == '*help':
             toSend = '*commands, *help'
@@ -235,7 +251,10 @@ class snaibot():
     def news(self, msg, channel, nick, client, msgMatch):
         '''Module and reading and editing latest news story. Edit only available to OP+.'''
         
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         if testmsg.split(' ')[0] == '*news':
             try:
                 if testmsg.split(' ')[1] == 'edit':
@@ -259,7 +278,10 @@ class snaibot():
     def showNormalLinks(self, msg, channel, nick, client, msgMatch):
         '''Parses list for links from Keyword Links and returns them to chat if found.'''
         
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         try:
             if testmsg[0] == '*':
                     toSend = self.config['Keyword Links'][testmsg[1:]]
@@ -271,7 +293,10 @@ class snaibot():
     def showSecretLinks(self, msg, channel, nick, client, msgMatch):
         '''Parses list for links from Secret Links and sends them directly to nick in query if found.'''
         
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         try:
             toSend = self.config['Secret Links'][testmsg[1:]]
             self.bot.sendMsg(nick, nick + ": " + toSend)
@@ -283,7 +308,10 @@ class snaibot():
     def showModInfo(self, msg, channel, nick, client, msgMatch):
         '''Parses msgs for mod-related commands and returns the appropriate info.'''
         
-        testmsg = msg.lower().split(' ')
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1].split(' ')
+        msg = parsemsg[2]        
         
         try:
             if testmsg[0] == '*mod' or testmsg[0] == '*mods':
@@ -330,7 +358,10 @@ class snaibot():
     def choose(self, msg, channel, nick, client, msgMatch):
         '''Takes a string of arguments from chat that are ;-separated and picks one at random.'''
         
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         if testmsg[:7] == '*choose':
             try:
                 toParse = msg[7:].rstrip().lstrip()
@@ -433,7 +464,10 @@ class snaibot():
     def remoteAdmin(self, msg, channel, nick, client, msgMatch):
         '''Module to allow command-based administration via chat from those either registered as admins in the config or those with OP+'''
         
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         configAdmin = self.confListParser(self.config['Admin']['Admin Nicks'])
         try:
             if channel.upper() in self.bot._channels:
@@ -513,7 +547,10 @@ class snaibot():
         
     def searchWiki(self, msg, channel, nick, client, msgMatch):
         '''Module allows for searching FTBWiki.org for articles. Bot is largely used for a Minecraft Community, so this was extremely helpful as a resource.'''
-        testmsg = msg.lower()
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        msg = parsemsg[2]
         if testmsg[:8] == '*ftbwiki':
             toParse = msg[8:].rstrip().lstrip()
             parList = toParse.split(' ')

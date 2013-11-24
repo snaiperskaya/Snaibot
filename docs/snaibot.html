@@ -67,6 +67,8 @@
 
 <dl><dt><a name="snaibot-echo"><strong>echo</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Simple&nbsp;parser&nbsp;for&nbsp;testing&nbsp;purposes.&nbsp;Will&nbsp;repeat&nbsp;msg&nbsp;with&nbsp;nick&nbsp;and&nbsp;client&nbsp;into&nbsp;chat.</tt></dd></dl>
 
+<dl><dt><a name="snaibot-getTestMsg"><strong>getTestMsg</strong></a>(self, nick, msg)</dt><dd><tt>New&nbsp;function&nbsp;to&nbsp;allow&nbsp;parsing&nbsp;of&nbsp;msg&nbsp;from&nbsp;IRC&nbsp;bot&nbsp;for&nbsp;gameserver.&nbsp;Takes&nbsp;a&nbsp;msg&nbsp;and&nbsp;original&nbsp;sending&nbsp;nick&nbsp;and&nbsp;attempts&nbsp;to&nbsp;parse&nbsp;out&nbsp;a&nbsp;message&nbsp;and&nbsp;nick&nbsp;from&nbsp;a&nbsp;CraftIRC&nbsp;bot.&nbsp;Returns&nbsp;a&nbsp;tuple&nbsp;of&nbsp;(nick,&nbsp;lowermsg,&nbsp;origmsg)</tt></dd></dl>
+
 <dl><dt><a name="snaibot-help"><strong>help</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Builds&nbsp;help&nbsp;command&nbsp;based&nbsp;on&nbsp;loaded&nbsp;modules.&nbsp;This&nbsp;will&nbsp;always&nbsp;run&nbsp;regardless&nbsp;of&nbsp;other&nbsp;modules&nbsp;loaded.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-languageKicker"><strong>languageKicker</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;to&nbsp;parse&nbsp;language&nbsp;in&nbsp;chat&nbsp;and&nbsp;log&nbsp;usage&nbsp;of&nbsp;"bad&nbsp;words"&nbsp;(as&nbsp;defined&nbsp;in&nbsp;config).&nbsp;Kicks&nbsp;and&nbsp;Bans&nbsp;based&nbsp;on&nbsp;config&nbsp;file.</tt></dd></dl>
