@@ -114,6 +114,9 @@ class snaibot():
             print('Basic settings.ini file built. Please configure and restart bot...')
             
         else:
+            self.config.remove_section('Mod Links')
+            self.config.remove_section('Keyword Links')
+            self.config.remove_section('Secret Links')
             self.config.read(self.configfile)
             if firstRun == True:
                 with open(self.configfile, 'w') as confile:
@@ -293,13 +296,13 @@ class snaibot():
                 count = 1
                 place = 0
                 while count < numsends:
-                    toSend = modlist[place]
+                    toSend = '*' + modlist[place]
                     for i in modlist[place + 1:place + 19]:
                         toSend = toSend + ', *' + i
                     self.bot.sendMsg(nick,toSend)
                     place = place + 20
                     count = count + 1
-                toSend = modlist[place]
+                toSend = '*' + modlist[place]
                 try:
                     for i in modlist[place + 1:]:
                         toSend = toSend + ', *' + i
