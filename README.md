@@ -11,6 +11,7 @@ Snaibot currently has the following features available:
 	- "Choose"
 	- News Item
 	- In-IRC Basic Administration
+	- YouTube Video Info for Links Posted to Chat
 	
 All run from a config file, which can be live-updated to turn modules on and off and items like links can be added to or modified without pulling the bot down.
 

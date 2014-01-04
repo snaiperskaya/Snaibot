@@ -25,6 +25,9 @@ import configparser
 import os
 import time
 import random
+from datetime import timedelta
+from urllib.request import urlopen
+from xml.dom.minidom import parseString
 
 
 class snaibot():
@@ -45,7 +48,8 @@ class snaibot():
                             'news':self.news,
                             'choose':self.choose,
                             'admin':self.remoteAdmin,
-                            'wiki':self.searchWiki}
+                            'wiki':self.searchWiki,
+                            'youtube':self.ytInfo}
                             #'listening':'',
                             #'speech':''}        
         
@@ -101,7 +105,8 @@ class snaibot():
                                     'News':'False',
                                     'Choose':'False',
                                     'Admin':'False',
-                                    'Wiki':'False'}
+                                    'Wiki':'False',
+                                    'Youtube':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -567,3 +572,67 @@ class snaibot():
                 searchURL = 'http://ftbwiki.org/index.php?search=' + searchTerm
                 fullURL = 'http://ftbwiki.org/' + instantURL
                 self.bot.sendMsg(channel, nick + ": Try this link: " + fullURL + ' or click here for full search results: ' + searchURL + '&fulltext=1')
+                
+    def ytInfo(self, msg, channel, nick, client, msgMatch):
+        '''Module to parse incoming messages for YouTube links and attempt to parse video info and reply to channel.'''
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1].split(' ')
+        msg = parsemsg[2].split(' ')
+        
+        for i in range(len(msg)):
+            if testmsg[i].count('youtube.com') > 0 or testmsg[i].count('youtu.be') > 0:
+                vid = msg[i]
+                try:
+                    vidid = vid.split('.be/')[1]
+                except:
+                    try:
+                        vidid = vid.split('&')[0].split('=')[1]
+                    except:
+                        return
+                
+                # Try to open gdata URL
+                try:
+                    url = 'https://gdata.youtube.com/feeds/api/videos/{0}'.format(vidid)
+                    s = urlopen(url).read()
+                    d = parseString(s)
+                except:
+                    return
+                    
+                # Get video length
+                try:
+                    e = d.getElementsByTagName('yt:duration')[0]
+                    a = e.attributes['seconds']
+                    v = int(a.value)
+                    time = timedelta(seconds=v)
+                except:
+                    time = 'N/A'
+                
+                # Get view count
+                try:
+                    e2 = d.getElementsByTagName('yt:statistics')[0]
+                    views = e2.attributes['viewCount'].value
+                except:
+                    views = 'N/A'
+                    
+                # Get video author
+                try:
+                    video_title = d.getElementsByTagName('title')[0].firstChild.nodeValue
+                except:
+                    video_title = 'Error retrieving title'
+                    
+                # Get video author
+                try:
+                    author = d.getElementsByTagName('author')[0].getElementsByTagName('name')[0].firstChild.nodeValue
+                except:
+                    author = 'Error retrieving author'
+                    
+                # Get video rating as percent
+                try:
+                    e3 = d.getElementsByTagName('gd:rating')[0]
+                    rating = float(e3.attributes['average'].value)
+                    rateperc = (rating / 5.0) * 100
+                    ratestr = '{0:.2F}%'.format(rateperc)
+                except:
+                    ratestr = 'N/A'
+                self.bot.sendMsg(channel,'"{}" by {} ( Views: {}   Rating: {}   Duration: {} )'.format(video_title, author, views, ratestr, time))                
