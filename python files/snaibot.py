@@ -587,7 +587,7 @@ class snaibot():
                     vidid = vid.split('.be/')[1]
                 except:
                     try:
-                        vidid = vid.split('&')[0].split('=')[1]
+                        vidid = vid.split('v=')[1].split('&')[0]
                     except:
                         return
                 
