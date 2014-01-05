@@ -611,19 +611,21 @@ class snaibot():
                 # Get view count
                 try:
                     e2 = d.getElementsByTagName('yt:statistics')[0]
-                    views = e2.attributes['viewCount'].value
+                    views = int(e2.attributes['viewCount'].value)
                 except:
                     views = 'N/A'
                     
                 # Get video author
                 try:
                     video_title = d.getElementsByTagName('title')[0].firstChild.nodeValue
+                    video_title = self.stripped(video_title)
                 except:
                     video_title = 'Error retrieving title'
                     
                 # Get video author
                 try:
                     author = d.getElementsByTagName('author')[0].getElementsByTagName('name')[0].firstChild.nodeValue
+                    author = self.stripped(author)
                 except:
                     author = 'Error retrieving author'
                     
