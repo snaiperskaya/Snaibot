@@ -558,6 +558,7 @@ class snaibot():
         msg = parsemsg[2]
         if testmsg[:8] == '*ftbwiki':
             toParse = msg[8:].rstrip().lstrip()
+            toParse = toParse.replace('\'', '%27')
             parList = toParse.split(' ')
             if parList[0] != '':
                 term1 = parList.pop(0)
