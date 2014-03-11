@@ -49,7 +49,8 @@ class snaibot():
                             'choose':self.choose,
                             'admin':self.remoteAdmin,
                             'wiki':self.searchWiki,
-                            'youtube':self.ytInfo}
+                            'youtube':self.ytInfo,
+                            'calculator':self.calculator}
                             #'listening':'',
                             #'speech':''}        
         
@@ -106,7 +107,8 @@ class snaibot():
                                     'Choose':'False',
                                     'Admin':'False',
                                     'Wiki':'False',
-                                    'Youtube':'False'}
+                                    'Youtube':'False',
+                                    'Calculator':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -249,6 +251,9 @@ class snaibot():
                 
             if modules['Wiki'].lower() == 'true':
                 toSend = toSend + ', *ftbwiki <searchterm>'            
+                
+            if modules['Calculator'].lower() == 'true':
+                toSend = toSend + ', *calc <expression>'            
             
             self.bot.sendMsg(channel, nick + ": " + toSend)            
     
@@ -638,4 +643,20 @@ class snaibot():
                     ratestr = '{0:.2F}%'.format(rateperc)
                 except:
                     ratestr = 'N/A'
-                self.bot.sendMsg(channel,'"{}" by {} ( Views: {}   Rating: {}   Duration: {} )'.format(video_title, author, views, ratestr, time))                
+                self.bot.sendMsg(channel,'"{}" by {} ( Views: {}   Rating: {}   Duration: {} )'.format(video_title, author, views, ratestr, time))
+                
+                
+    def calculator(self, msg, channel, nick, client, msgMatch):
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        
+        if testmsg[:5] == '*calc':
+            try:
+                toParse = testmsg[5:].strip(' ')
+                expr = toParse.replace('^', '**')
+                num = eval(expr)
+                self.bot.sendMsg(channel, nick + ': The answer should be ' + str(num))
+                
+            except:
+                self.bot.sendMsg(channel, nick + ': ERROR - Please check your formula...')
