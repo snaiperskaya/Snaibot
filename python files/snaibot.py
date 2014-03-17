@@ -18,16 +18,18 @@
 
 
 __author__ = 'C.S.Putnam'
-__version__ = '3.0'
+__version__ = '3.5'
 
 import pythonircbot
 import configparser
 import os
 import time
 import random
+import sqlite3
 from datetime import timedelta
 from urllib.request import urlopen
 from xml.dom.minidom import parseString
+
 
 
 class snaibot():
@@ -37,12 +39,13 @@ class snaibot():
         self.config = configparser.ConfigParser()
         self.configfile = configfile
         self.tryBuildConfig(True)
-        self.microLog = {}
-        self.modulestate = {}
+        self.db = self.config['SERVER']['botName']+ '-' + self.config['SERVER']['server'] + '.snaidb'
         
-        self.moduleref = {'normal links':self.showNormalLinks,
+        self.microLog = {}
+        self.msgmodulestate = {}
+        
+        self.msgmoduleref = {'normal links':self.showNormalLinks,
                             'secret links':self.showSecretLinks,
-                            'mod info':self.showModInfo,
                             'language filter':self.languageKicker,
                             'spam filter':self.spamFilter,
                             'news':self.news,
@@ -52,7 +55,15 @@ class snaibot():
                             'youtube':self.ytInfo,
                             'calculator':self.calculator}
                             #'listening':'',
-                            #'speech':''}        
+                            #'speech':''}
+                            
+        self.joinmodulestate = {}
+        
+        self.joinmoduleref = {'auto mode':self.autoModeSet}
+        
+        self.partmodulestate = {}
+        
+        self.partmoduleref = {}
         
         self.bot = pythonircbot.Bot(self.config['SERVER']['botName'], self.config['SERVER']['password'])
         self.bot.connect(self.config['SERVER']['server'], verbose = True)
@@ -73,8 +84,63 @@ class snaibot():
         self.bot.addMsgHandler(self.help)
         
         self.bot.waitForDisconnect()
-        
-        
+
+    def checkSQLDatabase(self):
+        '''Verifies SQL database exists. If not, creates db and basic table'''
+        if not os.path.exists(self.db):
+            conn = sqlite3.connect(self.db)
+            conn.isolation_level = None
+            done = False
+            while done != True:
+                c = conn.cursor()
+                c.execute('''CREATE TABLE chanmode
+                (channel text, nick text, mode text)''')
+                done = True
+            conn.close()
+    
+    def updateSQLTableCM(self, channel, nick, mode):
+        '''Updates SQL table for auto-mode set on join.'''
+        self.checkSQLDatabase()
+        conn = sqlite3.connect(self.db)
+        conn.isolation_level = None
+        done = False
+        hier = {'v':1, 'h':2, 'o':3}
+        while done != True:
+            try:
+                c = conn.cursor()
+                c.execute("SELECT mode FROM chanmode WHERE channel=? AND nick=?",(channel, nick))
+                try:
+                    test = str(c.fetchall()[0][0])
+                    if mode[0] == '-':
+                        if mode[1] == test:
+                            c.execute("""DELETE FROM chanmode WHERE channel=? AND nick=?""", (channel, nick))
+                    elif hier[test] < hier[mode]:
+                        c.execute("""UPDATE chanmode 
+                        SET mode = ?
+                        WHERE channel=? AND nick=?;""",(mode, channel, nick))
+                except:
+                    if mode[0] in ['v', 'h', 'o']:
+                        c.execute("""INSERT INTO chanmode VALUES (?,?,?)""", (channel, nick, mode))
+                done = True
+            except:
+                continue
+        conn.close()
+    
+    def modeSQLCheck(self, channel, nick):
+        self.checkSQLDatabase()
+        conn = sqlite3.connect(self.db)
+        try:
+            c = conn.cursor()
+            c.execute("SELECT mode FROM chanmode WHERE channel=? AND nick=?",(channel, nick))
+            print('SELECT Complete')
+            mode = str(c.fetchall()[0][0])
+            print("Mode to set: " + mode)
+            conn.close()
+            return mode
+        except:
+            conn.close()
+            return ''
+
     def getTestMsg(self, nick, msg):
         '''New function to allow parsing of msg from IRC bot for gameserver. Takes a msg and original sending nick and attempts to parse out a message and nick from a CraftIRC bot. Returns a tuple of (nick, lowermsg, origmsg)'''
         
@@ -100,7 +166,6 @@ class snaibot():
                 
             self.config['Modules'] = {'Normal Links':'False',
                                     'Secret Links':'False',
-                                    'Mod Info':'False',
                                     'Language Filter':'False',
                                     'Spam Filter':'False',
                                     'News':'False',
@@ -108,7 +173,8 @@ class snaibot():
                                     'Admin':'False',
                                     'Wiki':'False',
                                     'Youtube':'False',
-                                    'Calculator':'False'}
+                                    'Calculator':'False',
+                                    'Auto Mode':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -116,8 +182,6 @@ class snaibot():
             
             self.config['Keyword Links'] = {'source':'https://github.com/snaiperskaya/Snaibot/',
                                        'snaibot':'I was built by snaiperskaya for the good of all mankind...'}
-            
-            self.config['Mod Links'] = {'modname':'*link to mod*,*mod version*'}
             
             self.config['Secret Links'] = {'secret':'These links will not show up in .commands and will only send via query.'}
             
@@ -190,16 +254,52 @@ class snaibot():
         
         modules = self.config['Modules']
         
-        for module in self.moduleref.keys():
+        for module in self.msgmoduleref.keys():
             if modules[module].lower() == 'true' or modules[module].lower() == 'false':
                 if modules[module].lower() == 'true':
                     try:
-                        test = self.modulestate[module]
+                        test = self.msgmodulestate[module]
                     except:
-                        self.modulestate[module] = self.bot.addMsgHandler(self.moduleref[module])
+                        self.msgmodulestate[module] = self.bot.addMsgHandler(self.msgmoduleref[module])
                 elif modules[module].lower() == 'false':
                     try:
-                        self.bot.removeMsgHandler(self.modulestate.pop(module))
+                        self.bot.removeMsgHandler(self.msgmodulestate.pop(module))
+                    except:
+                        pass
+            else:
+                self.config['Modules'][module] = 'False'
+                with open(self.configfile, 'w') as configfile:
+                    self.config.write(configfile)
+                    configfile.close()
+                    
+        for module in self.joinmoduleref.keys():
+            if modules[module].lower() == 'true' or modules[module].lower() == 'false':
+                if modules[module].lower() == 'true':
+                    try:
+                        test = self.joinmodulestate[module]
+                    except:
+                        self.joinmodulestate[module] = self.bot.addJoinHandler(self.joinmoduleref[module])
+                elif modules[module].lower() == 'false':
+                    try:
+                        self.bot.removeJoinHandler(self.joinmodulestate.pop(module))
+                    except:
+                        pass
+            else:
+                self.config['Modules'][module] = 'False'
+                with open(self.configfile, 'w') as configfile:
+                    self.config.write(configfile)
+                    configfile.close()
+                    
+        for module in self.partmoduleref.keys():
+            if modules[module].lower() == 'true' or modules[module].lower() == 'false':
+                if modules[module].lower() == 'true':
+                    try:
+                        test = self.partmodulestate[module]
+                    except:
+                        self.partmodulestate[module] = self.bot.addPartHandler(self.partmoduleref[module])
+                elif modules[module].lower() == 'false':
+                    try:
+                        self.bot.removePartHandler(self.partmodulestate.pop(module))
                     except:
                         pass
             else:
@@ -238,9 +338,6 @@ class snaibot():
             
             if modules['News'].lower() == 'true':
                 toSend = toSend + ', *news'
-                
-            if modules['Mod Info'].lower() == 'true':
-                toSend = toSend + ', *mods'
                 
             if modules['Normal Links'].lower() == 'true':
                 for i in self.config.options('Keyword Links'):
@@ -314,56 +411,6 @@ class snaibot():
         except:
             return        
 
-
-    def showModInfo(self, msg, channel, nick, client, msgMatch):
-        '''Parses msgs for mod-related commands and returns the appropriate info.'''
-        
-        parsemsg = self.getTestMsg(nick, msg)
-        nick = parsemsg[0]
-        testmsg = parsemsg[1].split(' ')
-        msg = parsemsg[2]        
-        
-        try:
-            if testmsg[0] == '*mod' or testmsg[0] == '*mods':
-                toSend = ''
-                modlist = []
-                for i in self.config.options('Mod Links'):
-                    modlist.append(i)
-                modlist.sort()
-                numsends = len(modlist) / 20
-                count = 1
-                place = 0
-                while count < numsends:
-                    toSend = '*' + modlist[place]
-                    for i in modlist[place + 1:place + 19]:
-                        toSend = toSend + ', *' + i
-                    self.bot.sendMsg(nick,toSend)
-                    place = place + 20
-                    count = count + 1
-                toSend = '*' + modlist[place]
-                try:
-                    for i in modlist[place + 1:]:
-                        toSend = toSend + ', *' + i
-                except:
-                    pass
-                self.bot.sendMsg(nick,toSend)
-                
-            elif testmsg[0][0] == '*':
-                    
-                    try:
-                        toSend = self.config['Mod Links'][testmsg[0][1:]]
-                        toSend = toSend.strip(' ').split(',')
-                        try:
-                            if testmsg[1] == 'show':
-                                self.bot.sendMsg(channel, nick + ": " + toSend[0] + ' - Current server version is: ' + toSend[1])
-                            else:
-                                self.bot.sendMsg(nick, nick + ": " + toSend[0] + ' - Current server version is: ' + toSend[1])
-                        except:
-                            self.bot.sendMsg(nick, nick + ": " + toSend[0] + ' - Current server version is: ' + toSend[1])
-                    except:
-                        return
-        except:
-            return        
 
     def choose(self, msg, channel, nick, client, msgMatch):
         '''Takes a string of arguments from chat that are ;-separated and picks one at random.'''
@@ -500,20 +547,30 @@ class snaibot():
                                 self.bot.partChannel(chan)
                             else:
                                 self.bot.sendMsg(nick, 'Not a valid channel...')
-                        elif testmsg.split()[0] == '*kick':
-                            self.bot.kickUser(channel, testmsg.split()[1], 'Requested by {}'.format(nick))
-                        elif testmsg.split()[0] == '*v':
-                            self.bot.setMode(channel, testmsg.split()[1], 'v')
-                        elif testmsg.split()[0] == '*h':
-                            self.bot.setMode(channel, testmsg.split()[1], 'h')
-                        elif testmsg.split()[0] == '*o':
-                            self.bot.setMode(channel, testmsg.split()[1], 'o')
-                        elif testmsg.split()[0] == '*dv':
-                            self.bot.unsetMode(channel, testmsg.split()[1], 'v')
-                        elif testmsg.split()[0] == '*dh':
-                            self.bot.unsetMode(channel, testmsg.split()[1], 'h')
-                        elif testmsg.split()[0] == '*do':
-                            self.bot.unsetMode(channel, testmsg.split()[1], 'o')                        
+                        else:
+                            testmessage = testmsg.split()
+                            comm = testmessage.pop(0)
+                            for nick in testmessage:
+                                if comm == '*kick':
+                                    self.bot.kickUser(channel, nick, 'Requested by {}'.format(nick))
+                                elif comm == '*v':
+                                    self.bot.setMode(channel, nick, 'v')
+                                    self.updateSQLTableCM(channel, nick, 'v')
+                                elif comm == '*h':
+                                    self.bot.setMode(channel, nick, 'h')
+                                    self.updateSQLTableCM(channel, nick, 'h')
+                                elif comm == '*o':
+                                    self.bot.setMode(channel, nick, 'o')
+                                    self.updateSQLTableCM(channel, nick, 'o')
+                                elif comm == '*dv':
+                                    self.bot.unsetMode(channel, nick, 'v')
+                                    self.updateSQLTableCM(channel, nick, '-v')
+                                elif comm == '*dh':
+                                    self.bot.unsetMode(channel, nick, 'h')
+                                    self.updateSQLTableCM(channel, nick, '-h')
+                                elif comm == '*do':
+                                    self.bot.unsetMode(channel, nick, 'o')
+                                    self.updateSQLTableCM(channel, nick, '-o')
                             
                 else:
                     if testmsg == '*admin':
@@ -660,3 +717,10 @@ class snaibot():
                 
             except:
                 self.bot.sendMsg(channel, nick + ': ERROR - Please check your formula...')
+    
+    def autoModeSet(self, channel, nick, client):
+        self.bot.sendMsg(channel, 'Hello ' + nick)
+        mode = self.modeSQLCheck(channel, nick.lower())
+        if mode in ['v', 'h', 'o']:
+            self.bot.setMode(channel, nick, mode)
+            print("Mode set: " + mode)

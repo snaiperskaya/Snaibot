@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>pythonircbot</strong></big></big> (version 1.1)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///F:/programming%20projects/snaibot/refactored%20snaibot/pythonircbot.py">f:\programming projects\snaibot\refactored snaibot\pythonircbot.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///D:/programming%20projects/snaibot/pythonircbot%20update%20v2/pythonircbot.py">d:\programming projects\snaibot\pythonircbot update v2\pythonircbot.py</a></font></td></tr></table>
     <p><tt>Easily&nbsp;create&nbsp;IRC&nbsp;bots&nbsp;in&nbsp;Python<br>
 &nbsp;<br>
 Module&nbsp;providing&nbsp;an&nbsp;easy&nbsp;interface&nbsp;to&nbsp;create&nbsp;IRC&nbsp;bots.<br>
@@ -55,6 +55,25 @@ to&nbsp;handle&nbsp;messages,&nbsp;and&nbsp;abstracts&nbsp;many&nbsp;IRC&nbsp;co
 Arguments:<br>
 -&nbsp;nickname:&nbsp;Nickname&nbsp;of&nbsp;the&nbsp;bot</tt></dd></dl>
 
+<dl><dt><a name="Bot-addJoinHandler"><strong>addJoinHandler</strong></a>(self, function, channel<font color="#909090">='.*'</font>, nickname<font color="#909090">='.*'</font>, client<font color="#909090">='.*'</font>, channelFlags<font color="#909090">=0</font>, nicknameFlags<font color="#909090">=0</font>, clientFlags<font color="#909090">=0</font>, thread<font color="#909090">=True</font>)</dt><dd><tt>Adds&nbsp;a&nbsp;function&nbsp;to&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;received&nbsp;message.<br>
+Please&nbsp;keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;the&nbsp;functions&nbsp;are&nbsp;all&nbsp;executed&nbsp;concurrently.<br>
+Returns&nbsp;a&nbsp;function&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;remove&nbsp;the&nbsp;handler&nbsp;again&nbsp;with&nbsp;<a href="#Bot-removeJoinHandler">removeJoinHandler</a>().<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;function:&nbsp;The&nbsp;function&nbsp;that&nbsp;should&nbsp;be&nbsp;called<br>
+-&nbsp;channel:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;channel.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;nickname:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;nickname.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;client:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;client.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;channelFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;channel&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;nicknameFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;nickname&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;clientFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;client&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;thread:&nbsp;Execute&nbsp;function&nbsp;in&nbsp;seperate&nbsp;thread<br>
+&nbsp;<br>
+The&nbsp;function&nbsp;should&nbsp;have&nbsp;5&nbsp;arguments:<br>
+-&nbsp;channel:&nbsp;The&nbsp;second&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;channel&nbsp;the&nbsp;message&nbsp;was&nbsp;sent&nbsp;to.&nbsp;This&nbsp;will&nbsp;be&nbsp;the&nbsp;same&nbsp;as&nbsp;nickname&nbsp;when&nbsp;this&nbsp;was&nbsp;a&nbsp;private&nbsp;message.<br>
+-&nbsp;nickname:&nbsp;The&nbsp;third&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;nickname&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;the&nbsp;message.<br>
+-&nbsp;client:&nbsp;The&nbsp;fourth&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;client&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;this&nbsp;message.</tt></dd></dl>
+
 <dl><dt><a name="Bot-addMsgHandler"><strong>addMsgHandler</strong></a>(self, function, message<font color="#909090">='.*'</font>, channel<font color="#909090">='.*'</font>, nickname<font color="#909090">='.*'</font>, client<font color="#909090">='.*'</font>, messageFlags<font color="#909090">=0</font>, channelFlags<font color="#909090">=0</font>, nicknameFlags<font color="#909090">=0</font>, clientFlags<font color="#909090">=0</font>, thread<font color="#909090">=True</font>)</dt><dd><tt>Adds&nbsp;a&nbsp;function&nbsp;to&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;received&nbsp;message.<br>
 Please&nbsp;keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;the&nbsp;functions&nbsp;are&nbsp;all&nbsp;executed&nbsp;concurrently.<br>
 Returns&nbsp;a&nbsp;function&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;remove&nbsp;the&nbsp;handler&nbsp;again&nbsp;with&nbsp;<a href="#Bot-removeMsgHandler">removeMsgHandler</a>().<br>
@@ -77,6 +96,25 @@ The&nbsp;function&nbsp;should&nbsp;have&nbsp;5&nbsp;arguments:<br>
 -&nbsp;nickname:&nbsp;The&nbsp;third&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;nickname&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;the&nbsp;message.<br>
 -&nbsp;client:&nbsp;The&nbsp;fourth&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;client&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;this&nbsp;message.<br>
 -&nbsp;message&nbsp;match:&nbsp;Match&nbsp;<a href="builtins.html#object">object</a>&nbsp;(<a href="http://docs.python.org/library/re.html#match-objects">http://docs.python.org/library/re.html#match-objects</a>)&nbsp;of&nbsp;the&nbsp;regex&nbsp;applied&nbsp;to&nbsp;the&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="Bot-addPartHandler"><strong>addPartHandler</strong></a>(self, function, channel<font color="#909090">='.*'</font>, nickname<font color="#909090">='.*'</font>, client<font color="#909090">='.*'</font>, channelFlags<font color="#909090">=0</font>, nicknameFlags<font color="#909090">=0</font>, clientFlags<font color="#909090">=0</font>, thread<font color="#909090">=True</font>)</dt><dd><tt>Adds&nbsp;a&nbsp;function&nbsp;to&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;channel&nbsp;Part.<br>
+Please&nbsp;keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;the&nbsp;functions&nbsp;are&nbsp;all&nbsp;executed&nbsp;concurrently.<br>
+Returns&nbsp;a&nbsp;function&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;remove&nbsp;the&nbsp;handler&nbsp;again&nbsp;with&nbsp;<a href="#Bot-removePartHandler">removePartHandler</a>().<br>
+&nbsp;<br>
+Arguments:<br>
+-&nbsp;function:&nbsp;The&nbsp;function&nbsp;that&nbsp;should&nbsp;be&nbsp;called<br>
+-&nbsp;channel:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;channel.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;nickname:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;nickname.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;client:&nbsp;Regex&nbsp;that&nbsp;should&nbsp;match&nbsp;the&nbsp;client.&nbsp;If&nbsp;it&nbsp;does&nbsp;not,&nbsp;the&nbsp;function&nbsp;will&nbsp;not&nbsp;be&nbsp;called.<br>
+-&nbsp;channelFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;channel&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;nicknameFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;nickname&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;clientFlags:&nbsp;Flags&nbsp;for&nbsp;the&nbsp;client&nbsp;regex,&nbsp;as&nbsp;documented&nbsp;here:&nbsp;<a href="http://docs.python.org/library/re.html#re.compile">http://docs.python.org/library/re.html#re.compile</a><br>
+-&nbsp;thread:&nbsp;Execute&nbsp;function&nbsp;in&nbsp;seperate&nbsp;thread<br>
+&nbsp;<br>
+The&nbsp;function&nbsp;should&nbsp;have&nbsp;5&nbsp;arguments:<br>
+-&nbsp;channel:&nbsp;The&nbsp;second&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;channel&nbsp;the&nbsp;message&nbsp;was&nbsp;sent&nbsp;to.&nbsp;This&nbsp;will&nbsp;be&nbsp;the&nbsp;same&nbsp;as&nbsp;nickname&nbsp;when&nbsp;this&nbsp;was&nbsp;a&nbsp;private&nbsp;message.<br>
+-&nbsp;nickname:&nbsp;The&nbsp;third&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;nickname&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;the&nbsp;message.<br>
+-&nbsp;client:&nbsp;The&nbsp;fourth&nbsp;argument&nbsp;will&nbsp;be&nbsp;the&nbsp;client&nbsp;of&nbsp;the&nbsp;user&nbsp;who&nbsp;sent&nbsp;this&nbsp;message.</tt></dd></dl>
 
 <dl><dt><a name="Bot-banUser"><strong>banUser</strong></a>(self, channel, client)</dt><dd><tt>Ban&nbsp;client&nbsp;from&nbsp;channel<br>
 &nbsp;<br>
@@ -169,10 +207,20 @@ Arguments:<br>
 -&nbsp;message:&nbsp;Message&nbsp;to&nbsp;show&nbsp;when&nbsp;quitting.<br>
 -&nbsp;rejoin:&nbsp;Rejoin&nbsp;channels</tt></dd></dl>
 
+<dl><dt><a name="Bot-removeJoinHandler"><strong>removeJoinHandler</strong></a>(self, responseFunction)</dt><dd><tt>Remove&nbsp;a&nbsp;function&nbsp;from&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;join.<br>
+&nbsp;<br>
+Arguments:<br>
+responseFunction:&nbsp;Function&nbsp;that&nbsp;is&nbsp;returned&nbsp;by&nbsp;<a href="#Bot-addJoinHandler">addJoinHandler</a>()</tt></dd></dl>
+
 <dl><dt><a name="Bot-removeMsgHandler"><strong>removeMsgHandler</strong></a>(self, responseFunction)</dt><dd><tt>Remove&nbsp;a&nbsp;function&nbsp;from&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;received&nbsp;message.<br>
 &nbsp;<br>
 Arguments:<br>
 responseFunction:&nbsp;Function&nbsp;that&nbsp;is&nbsp;returned&nbsp;by&nbsp;<a href="#Bot-addMsgHandler">addMsgHandler</a>()</tt></dd></dl>
+
+<dl><dt><a name="Bot-removePartHandler"><strong>removePartHandler</strong></a>(self, responseFunction)</dt><dd><tt>Remove&nbsp;a&nbsp;function&nbsp;from&nbsp;the&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;should&nbsp;be&nbsp;executed&nbsp;on&nbsp;every&nbsp;part.<br>
+&nbsp;<br>
+Arguments:<br>
+responseFunction:&nbsp;Function&nbsp;that&nbsp;is&nbsp;returned&nbsp;by&nbsp;<a href="#Bot-addPartHandler">addPartHandler</a>()</tt></dd></dl>
 
 <dl><dt><a name="Bot-rename"><strong>rename</strong></a>(self, nickname)</dt><dd><tt>Renames&nbsp;the&nbsp;bot.<br>
 &nbsp;<br>

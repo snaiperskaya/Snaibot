@@ -31,7 +31,7 @@ to handle messages, and abstracts many IRC commands.
 """
 
 __author__ = 'Milan Boers'
-__version__ = '1.1'
+__version__ = '2.0'
 
 import socket
 import threading
@@ -188,14 +188,48 @@ class _BotReceiveThread(threading.Thread):
 		self._shutdownEvent.set()
 	
 	def _joinChannel(self, line):
-		matchJoin = re.compile('^:(.*)!.* JOIN :(.*)').search(line)
+		matchJoin = re.compile('^:(.*)!(.*) JOIN :(.*)').search(line)
 		if matchJoin:
-			self._joinedEvent.emit(matchJoin.group(1), matchJoin.group(2))
+			print("Channel Join Detected")
+			self._joinedEvent.emit(matchJoin.group(1), matchJoin.group(3))
+			nick = matchJoin.group(1)
+			client = matchJoin.group(2)
+			channel = matchJoin.group(3)			
+			if nick != self._bot._nick:
+				with self._bot._responseFunctionsLock:
+					_joinResponseFunctions = copy.copy(self._bot._joinResponseFunctions)
+				
+				for func in _joinResponseFunctions:
+					if func['thread']:
+						t = threading.Thread(target=func['func'], args=(nick, client, channel))
+						t.start()
+					else:
+						func(nick, client, channel)
+				
+				# Return a string, just to make sure it doesn't return None
+				return "continue"			
 	
 	def _partChannel(self, line):
-		matchPart = re.compile('^:(.*)!.* PART :(.*)').search(line)
+		matchPart = re.compile('^:(.*)!(.*) PART (.*)').search(line)
 		if matchPart:
-			self._partedEvent.emit(matchPart.group(1), matchPart.group(2))
+			print("Channel Part Detected")
+			self._partedEvent.emit(matchPart.group(1), matchPart.group(3))
+			nick = matchPart.group(1)
+			client = matchPart.group(2)
+			channel = matchPart.group(3)			
+			if nick != self._bot._nick:
+				with self._bot._responseFunctionsLock:
+					_partResponseFunctions = copy.copy(self._bot._partResponseFunctions)
+				
+				for func in _partResponseFunctions:
+					if func['thread']:
+						t = threading.Thread(target=func['func'], args=(nick, client, channel))
+						t.start()
+					else:
+						func(nick, client, channel)
+				
+				# Return a string, just to make sure it doesn't return None
+				return "continue"			
 	
 	def _quitM(self, line):
 		matchQuit = re.compile('^:{}!.* QUIT :'.format(self._bot._nick)).search(line)
@@ -256,9 +290,9 @@ class _BotReceiveThread(threading.Thread):
 			rmsg = matchPrivmsg.group(4)
 			
 			with self._bot._responseFunctionsLock:
-				_responseFunctions = copy.copy(self._bot._responseFunctions)
+				_msgResponseFunctions = copy.copy(self._bot._msgResponseFunctions)
 			
-			for func in _responseFunctions:
+			for func in _msgResponseFunctions:
 				if func['thread']:
 					t = threading.Thread(target=func['func'], args=(rmsg, nick, client, channel))
 					t.start()
@@ -309,7 +343,9 @@ class Bot(object):
 		
 		self._disconnectEvent = threading.Event()
 		
-		self._responseFunctions = []
+		self._msgResponseFunctions = []
+		self._joinResponseFunctions = []
+		self._partResponseFunctions = []
 		self._responseFunctionsLock = threading.Lock()
 	
 	def connect(self, host, port=6667, verbose=True, sleepTime=0.8, maxItems=10, channels=[]):
@@ -739,12 +775,12 @@ class Bot(object):
 		- message match: Match object (http://docs.python.org/library/re.html#match-objects) of the regex applied to the message.
 		"""
 		with self._responseFunctionsLock:
-			responseFunction = lambda rmsg, rnick, rclient, rchannel: self._responseFunction(function, rmsg, rnick, rclient, rchannel, message, channel, nickname, client, messageFlags, channelFlags, nicknameFlags, clientFlags)
+			responseFunction = lambda rmsg, rnick, rclient, rchannel: self._msgResponseFunction(function, rmsg, rnick, rclient, rchannel, message, channel, nickname, client, messageFlags, channelFlags, nicknameFlags, clientFlags)
 			responseFunctionDict = {
 				'func': responseFunction,
 				'thread': thread
 			}
-			self._responseFunctions.append(responseFunctionDict)
+			self._msgResponseFunctions.append(responseFunctionDict)
 			return responseFunctionDict
 	
 	def removeMsgHandler(self, responseFunction):
@@ -755,8 +791,89 @@ class Bot(object):
 		responseFunction: Function that is returned by addMsgHandler()
 		"""
 		with self._responseFunctionsLock:
-			self._responseFunctions.remove(responseFunction)
+			self._msgResponseFunctions.remove(responseFunction)
+
+
+	def addJoinHandler(self, function, channel='.*', nickname='.*', client='.*', channelFlags=0, nicknameFlags=0, clientFlags=0, thread=True):
+		"""
+		Adds a function to the list of functions that should be executed on every received message.
+		Please keep in mind that the functions are all executed concurrently.
+		Returns a function that can be used to remove the handler again with removeJoinHandler().
+		
+		Arguments:
+		- function: The function that should be called
+		- channel: Regex that should match the channel. If it does not, the function will not be called.
+		- nickname: Regex that should match the nickname. If it does not, the function will not be called.
+		- client: Regex that should match the client. If it does not, the function will not be called.
+		- channelFlags: Flags for the channel regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- nicknameFlags: Flags for the nickname regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- clientFlags: Flags for the client regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- thread: Execute function in seperate thread
+		
+		The function should have 5 arguments:
+		- channel: The second argument will be the channel the message was sent to. This will be the same as nickname when this was a private message.
+		- nickname: The third argument will be the nickname of the user who sent the message.
+		- client: The fourth argument will be the client of the user who sent this message.
+		"""
+		with self._responseFunctionsLock:
+			responseFunction = lambda rnick, rclient, rchannel: self._joinResponseFunction(function, rnick, rclient, rchannel, channel, nickname, client, channelFlags, nicknameFlags, clientFlags)
+			responseFunctionDict = {
+				'func': responseFunction,
+				'thread': thread
+			}
+			self._joinResponseFunctions.append(responseFunctionDict)
+			return responseFunctionDict
 	
+	def removeJoinHandler(self, responseFunction):
+		"""
+		Remove a function from the list of functions that should be executed on every join.
+		
+		Arguments:
+		responseFunction: Function that is returned by addJoinHandler()
+		"""
+		with self._responseFunctionsLock:
+			self._joinResponseFunctions.remove(responseFunction)
+
+	def addPartHandler(self, function, channel='.*', nickname='.*', client='.*', channelFlags=0, nicknameFlags=0, clientFlags=0, thread=True):
+		"""
+		Adds a function to the list of functions that should be executed on every channel Part.
+		Please keep in mind that the functions are all executed concurrently.
+		Returns a function that can be used to remove the handler again with removePartHandler().
+		
+		Arguments:
+		- function: The function that should be called
+		- channel: Regex that should match the channel. If it does not, the function will not be called.
+		- nickname: Regex that should match the nickname. If it does not, the function will not be called.
+		- client: Regex that should match the client. If it does not, the function will not be called.
+		- channelFlags: Flags for the channel regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- nicknameFlags: Flags for the nickname regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- clientFlags: Flags for the client regex, as documented here: http://docs.python.org/library/re.html#re.compile
+		- thread: Execute function in seperate thread
+		
+		The function should have 5 arguments:
+		- channel: The second argument will be the channel the message was sent to. This will be the same as nickname when this was a private message.
+		- nickname: The third argument will be the nickname of the user who sent the message.
+		- client: The fourth argument will be the client of the user who sent this message.
+		"""
+		with self._responseFunctionsLock:
+			responseFunction = lambda rnick, rclient, rchannel: self._partResponseFunction(function, rnick, rclient, rchannel, channel, nickname, client, channelFlags, nicknameFlags, clientFlags)
+			responseFunctionDict = {
+				'func': responseFunction,
+				'thread': thread
+			}
+			self._partResponseFunctions.append(responseFunctionDict)
+			return responseFunctionDict
+	
+	def removePartHandler(self, responseFunction):
+		"""
+		Remove a function from the list of functions that should be executed on every part.
+		
+		Arguments:
+		responseFunction: Function that is returned by addPartHandler()
+		"""
+		with self._responseFunctionsLock:
+			self._partResponseFunctions.remove(responseFunction)
+
 	def waitForDisconnect(self):
 		"""
 		Blocks until the bot has disconnected.
@@ -767,7 +884,7 @@ class Bot(object):
 	Internal functions
 	"""
 	
-	def _responseFunction(self, function, msg, nick, client, channel, msgConstraint, channelsConstraint, nicksConstraint, clientsConstraint, msgFlags, channelFlags, nickFlags, clientFlags):
+	def _msgResponseFunction(self, function, msg, nick, client, channel, msgConstraint, channelsConstraint, nicksConstraint, clientsConstraint, msgFlags, channelFlags, nickFlags, clientFlags):
 		channelsMatch = re.compile(channelsConstraint, channelFlags).search(channel)
 		if not channelsMatch:
 			return
@@ -787,3 +904,27 @@ class Bot(object):
 			channel = nick
 		
 		function(msg, channel, nick, client, msgMatch)
+
+	def _joinResponseFunction(self, function, nick, client, channel, channelsConstraint, nicksConstraint, clientsConstraint, channelFlags, nickFlags, clientFlags):
+		channelsMatch = re.compile(channelsConstraint, channelFlags).search(channel)
+		if not channelsMatch:
+			return
+		nicksMatch = re.compile(nicksConstraint, nickFlags).search(nick)
+		if not nicksMatch:
+			return
+		clientsMatch = re.compile(clientsConstraint, clientFlags).search(client)
+		if not clientsMatch:
+			return
+		function(channel, nick, client)
+
+	def _partResponseFunction(self, function, nick, client, channel, channelsConstraint, nicksConstraint, clientsConstraint, channelFlags, nickFlags, clientFlags):
+		channelsMatch = re.compile(channelsConstraint, channelFlags).search(channel)
+		if not channelsMatch:
+			return
+		nicksMatch = re.compile(nicksConstraint, nickFlags).search(nick)
+		if not nicksMatch:
+			return
+		clientsMatch = re.compile(clientsConstraint, clientFlags).search(client)
+		if not clientsMatch:
+			return		
+		function(channel, nick, client)

@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>snaibot</strong></big></big> (version 3.0)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///D:/programming%20projects/snaibot/refactored%20snaibot/snaibot.py">d:\programming projects\snaibot\refactored snaibot\snaibot.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///D:/programming%20projects/snaibot/pythonircbot%20update%20v2/snaibot.py">d:\programming projects\snaibot\pythonircbot update v2\snaibot.py</a></font></td></tr></table>
     <p><tt>#&nbsp;&nbsp;&nbsp;&nbsp;<a href="#snaibot">snaibot</a>,&nbsp;Python&nbsp;3-based&nbsp;IRC&nbsp;utility&nbsp;bot<br>
 #&nbsp;&nbsp;&nbsp;&nbsp;Copyright&nbsp;(C)&nbsp;2013&nbsp;&nbsp;C.S.Putnam<br>
 #<br>
@@ -35,7 +35,8 @@
 <a href="os.html">os</a><br>
 </td><td width="25%" valign=top><a href="pythonircbot.html">pythonircbot</a><br>
 <a href="random.html">random</a><br>
-</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top><a href="sqlite3.html">sqlite3</a><br>
+<a href="time.html">time</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -61,7 +62,11 @@
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="snaibot-__init__"><strong>__init__</strong></a>(self, configfile)</dt><dd><tt>Initializes&nbsp;<a href="#snaibot">snaibot</a>&nbsp;<a href="builtins.html#object">object</a>.&nbsp;Requires&nbsp;only&nbsp;the&nbsp;filename&nbsp;for&nbsp;a&nbsp;settings.ini&nbsp;file&nbsp;in&nbsp;the&nbsp;same&nbsp;folder,&nbsp;which&nbsp;it&nbsp;will&nbsp;either&nbsp;read&nbsp;from&nbsp;(if&nbsp;found)&nbsp;or&nbsp;build&nbsp;(if&nbsp;not&nbsp;found).&nbsp;Default&nbsp;settings.ini&nbsp;file&nbsp;will&nbsp;not&nbsp;be&nbsp;sufficient&nbsp;to&nbsp;run&nbsp;bot&nbsp;program&nbsp;and&nbsp;will&nbsp;require&nbsp;configuration.</tt></dd></dl>
 
+<dl><dt><a name="snaibot-autoModeSet"><strong>autoModeSet</strong></a>(self, channel, nick, client)</dt></dl>
+
 <dl><dt><a name="snaibot-calculator"><strong>calculator</strong></a>(self, msg, channel, nick, client, msgMatch)</dt></dl>
+
+<dl><dt><a name="snaibot-checkSQLDatabase"><strong>checkSQLDatabase</strong></a>(self)</dt><dd><tt>Verifies&nbsp;SQL&nbsp;database&nbsp;exists.&nbsp;If&nbsp;not,&nbsp;creates&nbsp;db&nbsp;and&nbsp;basic&nbsp;table</tt></dd></dl>
 
 <dl><dt><a name="snaibot-choose"><strong>choose</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Takes&nbsp;a&nbsp;string&nbsp;of&nbsp;arguments&nbsp;from&nbsp;chat&nbsp;that&nbsp;are&nbsp;;-separated&nbsp;and&nbsp;picks&nbsp;one&nbsp;at&nbsp;random.</tt></dd></dl>
 
@@ -75,6 +80,8 @@
 
 <dl><dt><a name="snaibot-languageKicker"><strong>languageKicker</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;to&nbsp;parse&nbsp;language&nbsp;in&nbsp;chat&nbsp;and&nbsp;log&nbsp;usage&nbsp;of&nbsp;"bad&nbsp;words"&nbsp;(as&nbsp;defined&nbsp;in&nbsp;config).&nbsp;Kicks&nbsp;and&nbsp;Bans&nbsp;based&nbsp;on&nbsp;config&nbsp;file.</tt></dd></dl>
 
+<dl><dt><a name="snaibot-modeSQLCheck"><strong>modeSQLCheck</strong></a>(self, channel, nick)</dt></dl>
+
 <dl><dt><a name="snaibot-news"><strong>news</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;and&nbsp;reading&nbsp;and&nbsp;editing&nbsp;latest&nbsp;news&nbsp;story.&nbsp;Edit&nbsp;only&nbsp;available&nbsp;to&nbsp;OP+.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-opsListBuilder"><strong>opsListBuilder</strong></a>(self, channel, level<font color="#909090">='o'</font>)</dt><dd><tt>Scans&nbsp;the&nbsp;channel&nbsp;and&nbsp;returns&nbsp;a&nbsp;set&nbsp;containing&nbsp;all&nbsp;people&nbsp;with&nbsp;elevated&nbsp;privledges&nbsp;in&nbsp;the&nbsp;channel&nbsp;specified.&nbsp;Level&nbsp;allows&nbsp;specification&nbsp;of&nbsp;minimum&nbsp;priledge&nbsp;level&nbsp;to&nbsp;include.&nbsp;Default&nbsp;will&nbsp;be&nbsp;"o"&nbsp;(OPS+),&nbsp;but&nbsp;other&nbsp;options&nbsp;will&nbsp;be&nbsp;"v"&nbsp;(Voice+),&nbsp;"h"&nbsp;(HOPS+),&nbsp;"a"&nbsp;(AOPS+),&nbsp;and&nbsp;"own"&nbsp;(Owner&nbsp;only).&nbsp;Note&nbsp;that&nbsp;some&nbsp;servers&nbsp;only&nbsp;consider&nbsp;some&nbsp;of&nbsp;these&nbsp;(some&nbsp;only&nbsp;use&nbsp;OP&nbsp;and&nbsp;Voice,&nbsp;in&nbsp;which&nbsp;case&nbsp;use&nbsp;of&nbsp;"h"&nbsp;would&nbsp;still&nbsp;only&nbsp;include&nbsp;Voice).</tt></dd></dl>
@@ -82,8 +89,6 @@
 <dl><dt><a name="snaibot-remoteAdmin"><strong>remoteAdmin</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;to&nbsp;allow&nbsp;command-based&nbsp;administration&nbsp;via&nbsp;chat&nbsp;from&nbsp;those&nbsp;either&nbsp;registered&nbsp;as&nbsp;admins&nbsp;in&nbsp;the&nbsp;config&nbsp;or&nbsp;those&nbsp;with&nbsp;OP+</tt></dd></dl>
 
 <dl><dt><a name="snaibot-searchWiki"><strong>searchWiki</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;allows&nbsp;for&nbsp;searching&nbsp;FTBWiki.org&nbsp;for&nbsp;articles.&nbsp;Bot&nbsp;is&nbsp;largely&nbsp;used&nbsp;for&nbsp;a&nbsp;Minecraft&nbsp;Community,&nbsp;so&nbsp;this&nbsp;was&nbsp;extremely&nbsp;helpful&nbsp;as&nbsp;a&nbsp;resource.</tt></dd></dl>
-
-<dl><dt><a name="snaibot-showModInfo"><strong>showModInfo</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Parses&nbsp;msgs&nbsp;for&nbsp;mod-related&nbsp;commands&nbsp;and&nbsp;returns&nbsp;the&nbsp;appropriate&nbsp;info.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-showNormalLinks"><strong>showNormalLinks</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Parses&nbsp;list&nbsp;for&nbsp;links&nbsp;from&nbsp;Keyword&nbsp;Links&nbsp;and&nbsp;returns&nbsp;them&nbsp;to&nbsp;chat&nbsp;if&nbsp;found.</tt></dd></dl>
 
@@ -96,6 +101,8 @@
 <dl><dt><a name="snaibot-tryBuildConfig"><strong>tryBuildConfig</strong></a>(self, firstRun<font color="#909090">=False</font>)</dt><dd><tt>Attempts&nbsp;to&nbsp;find&nbsp;the&nbsp;config&nbsp;file.&nbsp;Will&nbsp;load&nbsp;if&nbsp;found&nbsp;or&nbsp;build&nbsp;a&nbsp;default&nbsp;if&nbsp;not&nbsp;found.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-updateModules"><strong>updateModules</strong></a>(self)</dt><dd><tt>NEW&nbsp;TO&nbsp;SNAIBOT&nbsp;3.0:&nbsp;This&nbsp;will&nbsp;form&nbsp;the&nbsp;backbone&nbsp;of&nbsp;the&nbsp;new&nbsp;modular&nbsp;design.&nbsp;This&nbsp;will&nbsp;update&nbsp;the&nbsp;settings&nbsp;from&nbsp;the&nbsp;config&nbsp;and&nbsp;attempt&nbsp;to&nbsp;turn&nbsp;on&nbsp;or&nbsp;off&nbsp;modules&nbsp;based&nbsp;on&nbsp;those&nbsp;settings.&nbsp;If&nbsp;a&nbsp;module&nbsp;is&nbsp;not&nbsp;properly&nbsp;marked&nbsp;as&nbsp;true&nbsp;or&nbsp;false&nbsp;in&nbsp;the&nbsp;config,&nbsp;it&nbsp;will&nbsp;set&nbsp;it&nbsp;to&nbsp;false&nbsp;automatically.</tt></dd></dl>
+
+<dl><dt><a name="snaibot-updateSQLTableCM"><strong>updateSQLTableCM</strong></a>(self, channel, nick, mode)</dt><dd><tt>Updates&nbsp;SQL&nbsp;table&nbsp;for&nbsp;auto-mode&nbsp;set&nbsp;on&nbsp;join.</tt></dd></dl>
 
 <dl><dt><a name="snaibot-ytInfo"><strong>ytInfo</strong></a>(self, msg, channel, nick, client, msgMatch)</dt><dd><tt>Module&nbsp;to&nbsp;parse&nbsp;incoming&nbsp;messages&nbsp;for&nbsp;YouTube&nbsp;links&nbsp;and&nbsp;attempt&nbsp;to&nbsp;parse&nbsp;video&nbsp;info&nbsp;and&nbsp;reply&nbsp;to&nbsp;channel.</tt></dd></dl>
 
