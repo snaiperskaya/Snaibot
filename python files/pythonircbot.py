@@ -190,7 +190,6 @@ class _BotReceiveThread(threading.Thread):
 	def _joinChannel(self, line):
 		matchJoin = re.compile('^:(.*)!(.*) JOIN :(.*)').search(line)
 		if matchJoin:
-			print("Channel Join Detected")
 			self._joinedEvent.emit(matchJoin.group(1), matchJoin.group(3))
 			nick = matchJoin.group(1)
 			client = matchJoin.group(2)
@@ -212,7 +211,6 @@ class _BotReceiveThread(threading.Thread):
 	def _partChannel(self, line):
 		matchPart = re.compile('^:(.*)!(.*) PART (.*)').search(line)
 		if matchPart:
-			print("Channel Part Detected")
 			self._partedEvent.emit(matchPart.group(1), matchPart.group(3))
 			nick = matchPart.group(1)
 			client = matchPart.group(2)

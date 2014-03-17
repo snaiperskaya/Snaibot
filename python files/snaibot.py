@@ -132,9 +132,7 @@ class snaibot():
         try:
             c = conn.cursor()
             c.execute("SELECT mode FROM chanmode WHERE channel=? AND nick=?",(channel, nick))
-            print('SELECT Complete')
             mode = str(c.fetchall()[0][0])
-            print("Mode to set: " + mode)
             conn.close()
             return mode
         except:
@@ -719,8 +717,6 @@ class snaibot():
                 self.bot.sendMsg(channel, nick + ': ERROR - Please check your formula...')
     
     def autoModeSet(self, channel, nick, client):
-        self.bot.sendMsg(channel, 'Hello ' + nick)
         mode = self.modeSQLCheck(channel, nick.lower())
         if mode in ['v', 'h', 'o']:
             self.bot.setMode(channel, nick, mode)
-            print("Mode set: " + mode)
