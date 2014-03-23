@@ -188,51 +188,78 @@ class _BotReceiveThread(threading.Thread):
 		self._shutdownEvent.set()
 	
 	def _joinChannel(self, line):
-		matchJoin = re.compile('^:(.*)!(.*) JOIN :(.*)').search(line)
-		if matchJoin:
-			self._joinedEvent.emit(matchJoin.group(1), matchJoin.group(3))
-			nick = matchJoin.group(1)
-			client = matchJoin.group(2)
-			channel = matchJoin.group(3)			
-			if nick != self._bot._nick:
-				with self._bot._responseFunctionsLock:
-					_joinResponseFunctions = copy.copy(self._bot._joinResponseFunctions)
-				
-				for func in _joinResponseFunctions:
-					if func['thread']:
-						t = threading.Thread(target=func['func'], args=(nick, client, channel))
-						t.start()
-					else:
-						func(nick, client, channel)
-				
-				# Return a string, just to make sure it doesn't return None
-				return "continue"			
-	
+		matchJoin1 = re.compile('^:(.*)!(.*) JOIN :(.*)').search(line)
+		matchJoin2 = re.compile('^:(.*)!(.*) JOIN (.*)').search(line)
+		for joinMatch in [matchJoin1, matchJoin2]:
+			if joinMatch:
+				try:
+					self._joinedEvent.emit(joinMatch.group(1), joinMatch.group(3))
+					nick = joinMatch.group(1)
+					client = joinMatch.group(2)
+					channel = joinMatch.group(3)			
+					if nick != self._bot._nick:
+						with self._bot._responseFunctionsLock:
+							_joinResponseFunctions = copy.copy(self._bot._joinResponseFunctions)
+						
+						for func in _joinResponseFunctions:
+							if func['thread']:
+								t = threading.Thread(target=func['func'], args=(nick, client, channel))
+								t.start()
+							else:
+								func(nick, client, channel)
+					
+						# Return a string, just to make sure it doesn't return None
+						return "continue"
+				except:
+					continue
+			
 	def _partChannel(self, line):
-		matchPart = re.compile('^:(.*)!(.*) PART (.*)').search(line)
-		if matchPart:
-			self._partedEvent.emit(matchPart.group(1), matchPart.group(3))
-			nick = matchPart.group(1)
-			client = matchPart.group(2)
-			channel = matchPart.group(3)			
+		matchPart1 = re.compile('^:(.*)!(.*) PART :(.*)').search(line)
+		matchPart2 = re.compile('^:(.*)!(.*) PART (.*)').search(line)
+		for partMatch in [matchPart1, matchPart2]:
+			if partMatch:
+				try:
+					self._partedEvent.emit(partMatch.group(1), partMatch.group(3))
+					nick = partMatch.group(1)
+					client = partMatch.group(2)
+					channel = partMatch.group(3)			
+					if nick != self._bot._nick:
+						with self._bot._responseFunctionsLock:
+							_partResponseFunctions = copy.copy(self._bot._partResponseFunctions)
+						
+						for func in _partResponseFunctions:
+							if func['thread']:
+								t = threading.Thread(target=func['func'], args=(nick, client, channel))
+								t.start()
+							else:
+								func(nick, client, channel)
+						
+						# Return a string, just to make sure it doesn't return None
+						return "continue"
+				except:
+					continue
+	
+	def _quitM(self, line):
+		matchQuit = re.compile('^:{}!.* QUIT :'.format(self._bot._nick)).search(line)
+		matchQuit2 = re.compile('^:(.*)!(.*) QUIT :.*').search(line)
+		if matchQuit:
+			self._die()
+		elif matchQuit2:
+			nick = matchQuit2.group(1)
+			client = matchQuit2.group(2)			
 			if nick != self._bot._nick:
 				with self._bot._responseFunctionsLock:
 					_partResponseFunctions = copy.copy(self._bot._partResponseFunctions)
 				
 				for func in _partResponseFunctions:
 					if func['thread']:
-						t = threading.Thread(target=func['func'], args=(nick, client, channel))
+						t = threading.Thread(target=func['func'], args=(nick, client, ""))
 						t.start()
 					else:
-						func(nick, client, channel)
+						func(nick, client, "")
 				
 				# Return a string, just to make sure it doesn't return None
 				return "continue"			
-	
-	def _quitM(self, line):
-		matchQuit = re.compile('^:{}!.* QUIT :'.format(self._bot._nick)).search(line)
-		if matchQuit:
-			self._die()
 	
 	def _names(self, line):
 		matchNames = re.compile('^:.* 353 {} .* (.*) :(.*)'.format(self._bot._nick)).search(line)
