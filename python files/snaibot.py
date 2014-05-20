@@ -18,7 +18,7 @@
 
 
 __author__ = 'C.S.Putnam'
-__version__ = '3.5'
+__version__ = '3.6'
 
 import pythonircbot
 import configparser
@@ -26,6 +26,7 @@ import os
 import time
 import random
 import sqlite3
+import json
 from datetime import timedelta
 from urllib.request import urlopen
 from xml.dom.minidom import parseString
@@ -436,37 +437,40 @@ class snaibot():
         if channel.upper() in self.bot._channels:
             
             tryOPVoice = self.opsListBuilder(channel,'v')
+            tryOP = self.opsListBuilder(channel, 'h')
             
-            if nick not in tryOPVoice:
-                
-                msg = msg.lower()
+            if self.bot._nick in tryOP:
             
-                numTilKick = int(self.config['KICK/BAN Settings']['number of repeat messages before kick']) - 1
-                numTilBan = int(self.config['KICK/BAN Settings']['number of kicks before channel ban'])
+                if nick not in tryOPVoice:
+                    
+                    msg = msg.lower()
                 
-                if channel not in self.microLog:
-                    self.microLog[channel] = {client:[msg, 1, 0]}
+                    numTilKick = int(self.config['KICK/BAN Settings']['number of repeat messages before kick']) - 1
+                    numTilBan = int(self.config['KICK/BAN Settings']['number of kicks before channel ban'])
                     
-                elif client not in self.microLog[channel]:
-                    self.microLog[channel][client] = [msg, 1, 0]
-                    
-                elif self.microLog[channel][client][0] == msg and self.microLog[channel][client][1] >= numTilKick and self.microLog[channel][client][2] >= (numTilBan - 1):
-                    self.bot.banUser(channel, client)
-                    self.bot.kickUser(channel, nick, 'Spamming (bot)')
-                    self.microLog[channel][client][1] = numTilKick - 1
-                    self.microLog[channel][client][2] = 0
-                    
-                elif self.microLog[channel][client][0] == msg and self.microLog[channel][client][1] >= numTilKick:
-                    self.bot.kickUser(channel, nick, 'Spamming (bot)')
-                    self.microLog[channel][client][1] = numTilKick - 1
-                    self.microLog[channel][client][2] = self.microLog[channel][client][2] + 1
-                    
-                elif self.microLog[channel][client][0] == msg:
-                    self.microLog[channel][client][1] = self.microLog[channel][client][1] + 1
-                    
-                else:
-                    self.microLog[channel][client][0] = msg
-                    self.microLog[channel][client][1] = 1
+                    if channel not in self.microLog:
+                        self.microLog[channel] = {client:[msg, 1, 0]}
+                        
+                    elif client not in self.microLog[channel]:
+                        self.microLog[channel][client] = [msg, 1, 0]
+                        
+                    elif self.microLog[channel][client][0] == msg and self.microLog[channel][client][1] >= numTilKick and self.microLog[channel][client][2] >= (numTilBan - 1):
+                        self.bot.banUser(channel, client)
+                        self.bot.kickUser(channel, nick, 'Spamming (bot)')
+                        self.microLog[channel][client][1] = numTilKick - 1
+                        self.microLog[channel][client][2] = 0
+                        
+                    elif self.microLog[channel][client][0] == msg and self.microLog[channel][client][1] >= numTilKick:
+                        self.bot.kickUser(channel, nick, 'Spamming (bot)')
+                        self.microLog[channel][client][1] = numTilKick - 1
+                        self.microLog[channel][client][2] = self.microLog[channel][client][2] + 1
+                        
+                    elif self.microLog[channel][client][0] == msg:
+                        self.microLog[channel][client][1] = self.microLog[channel][client][1] + 1
+                        
+                    else:
+                        self.microLog[channel][client][0] = msg
+                        self.microLog[channel][client][1] = 1
 
 
     def languageKicker(self, msg, channel, nick, client, msgMatch):
@@ -475,46 +479,49 @@ class snaibot():
         if channel.upper() in self.bot._channels:
             
             tryOPVoice = self.opsListBuilder(channel,'v')
+            tryOP = self.opsListBuilder(channel, 'h')
             
-            if nick not in tryOPVoice:    
-                
-                msg = msg.lower()
-                msg = self.stripped(msg)
-                msg = msg.strip('.,!?/@#$^:;*&()\\ -_')
-                
-                words = self.confListParser(self.config['KICK/BAN Settings']['Naughty words'])
-                #msglist = msg.split()
-                
-                numTilKick = 1
-                numTilBan = int(self.config['KICK/BAN Settings']['number of kicks before channel ban'])    
-                
-                for i in words:
-                    if i in msg:
-                        if channel not in self.microSwearLog:
-                            self.microSwearLog[channel] = {client:[1, 0]}
-                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
-                            
-                        elif client not in self.microSwearLog[channel]:
-                            self.microSwearLog[channel][client] = [1, 0]
-                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
-                            
-                        elif self.microSwearLog[channel][client][0] >= numTilKick and self.microSwearLog[channel][client][1] >= numTilBan:
-                            self.bot.banUser(channel, client)
-                            self.bot.kickUser(channel, nick, 'Swearing (bot)')
-                            self.microSwearLog[channel][client][0] = numTilKick - 1
-                            self.microSwearLog[channel][client][1] = 0
-                            
-                        elif self.microSwearLog[channel][client][0] >= numTilKick:
-                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
-                            self.bot.kickUser(channel, nick, 'Swearing (bot)')
-                            self.microSwearLog[channel][client][0] = numTilKick - 1
-                            self.microSwearLog[channel][client][1] = self.microSwearLog[channel][client][1] + 1
-                            
-                        else:
-                            self.microSwearLog[channel][client][0] = self.microSwearLog[channel][client][0] + 1
-                            self.bot.sendMsg(channel, nick + ": Please watch your language...")
-                            
-                        break
+            if self.bot._nick in tryOP:            
+            
+                if nick not in tryOPVoice:    
+                    
+                    msg = msg.lower()
+                    msg = self.stripped(msg)
+                    msg = msg.strip('.,!?/@#$^:;*&()\\ -_')
+                    
+                    words = self.confListParser(self.config['KICK/BAN Settings']['Naughty words'])
+                    #msglist = msg.split()
+                    
+                    numTilKick = 1
+                    numTilBan = int(self.config['KICK/BAN Settings']['number of kicks before channel ban'])    
+                    
+                    for i in words:
+                        if i in msg:
+                            if channel not in self.microSwearLog:
+                                self.microSwearLog[channel] = {client:[1, 0]}
+                                self.bot.sendMsg(channel, nick + ": Please watch your language...")
+                                
+                            elif client not in self.microSwearLog[channel]:
+                                self.microSwearLog[channel][client] = [1, 0]
+                                self.bot.sendMsg(channel, nick + ": Please watch your language...")
+                                
+                            elif self.microSwearLog[channel][client][0] >= numTilKick and self.microSwearLog[channel][client][1] >= numTilBan:
+                                self.bot.banUser(channel, client)
+                                self.bot.kickUser(channel, nick, 'Swearing (bot)')
+                                self.microSwearLog[channel][client][0] = numTilKick - 1
+                                self.microSwearLog[channel][client][1] = 0
+                                
+                            elif self.microSwearLog[channel][client][0] >= numTilKick:
+                                self.bot.sendMsg(channel, nick + ": Please watch your language...")
+                                self.bot.kickUser(channel, nick, 'Swearing (bot)')
+                                self.microSwearLog[channel][client][0] = numTilKick - 1
+                                self.microSwearLog[channel][client][1] = self.microSwearLog[channel][client][1] + 1
+                                
+                            else:
+                                self.microSwearLog[channel][client][0] = self.microSwearLog[channel][client][0] + 1
+                                self.bot.sendMsg(channel, nick + ": Please watch your language...")
+                                
+                            break
                     
     def remoteAdmin(self, msg, channel, nick, client, msgMatch):
         '''Module to allow command-based administration via chat from those either registered as admins in the config or those with OP+'''
@@ -611,29 +618,74 @@ class snaibot():
             pass
         
     def searchWiki(self, msg, channel, nick, client, msgMatch):
-        '''Module allows for searching FTBWiki.org for articles. Bot is largely used for a Minecraft Community, so this was extremely helpful as a resource.'''
-        parsemsg = self.getTestMsg(nick, msg)
-        nick = parsemsg[0]
-        testmsg = parsemsg[1]
-        msg = parsemsg[2]
-        if testmsg[:8] == '*ftbwiki':
-            toParse = msg[8:].rstrip().lstrip()
-            toParse = toParse.replace('\'', '%27')
-            parList = toParse.split(' ')
-            if parList[0] != '':
-                term1 = parList.pop(0)
-                term1 = term1[:1].upper() + term1[1:]
-                searchTerm = term1
-                instantURL = term1
-                for i in parList:
-                    term = i
-                    term = term[:1].upper() + term[1:]
-                    searchTerm = searchTerm + '+' + term
-                    instantURL = instantURL + '_' + term
-                searchURL = 'http://ftbwiki.org/index.php?search=' + searchTerm
-                fullURL = 'http://ftbwiki.org/' + instantURL
-                self.bot.sendMsg(channel, nick + ": Try this link: " + fullURL + ' or click here for full search results: ' + searchURL + '&fulltext=1')
-                
+        '''Module allows for searching ATLWiki.net for articles. Bot is largely used for a Minecraft Community, so this was extremely helpful as a resource.'''
+        try:
+            parsemsg = self.getTestMsg(nick, msg)
+            nick = parsemsg[0]
+            testmsg = parsemsg[1]
+            msg = parsemsg[2]
+            if testmsg[:9] == '*fullwiki':
+                toParse = msg[9:].rstrip().lstrip()
+                toParse = toParse.replace('\'', '%27')
+                parList = toParse.split(' ')
+                if parList[0] != '':
+                    term1 = parList.pop(0)
+                    term1 = term1[:1].upper() + term1[1:]
+                    searchTerm = term1
+                    instantURL = term1
+                    for i in parList:
+                        term = i
+                        term = term[:1].upper() + term[1:]
+                        searchTerm = searchTerm + '%20' + term
+                    baseurl = "http://atlwiki.net/api.php?format=json&action=query&list=search&srsearch={}&srwhat=title"
+                    qurl = baseurl.format(searchTerm)
+                    openurl = urlopen(qurl).read()
+                    jsread = json.loads(openurl.decode('utf-8'))
+                    numTitles = len(jsread['query']['search'])
+                    if numTitles > 0:
+                        self.bot.sendMsg(nick, "Full search results for " + searchTerm.replace('%20',' '))
+                        for i in jsread['query']['search']:
+                            self.bot.sendMsg(nick, i['title'] + '  -  http://atlwiki.net/{}'.format(i['title'].replace(' ', '_')))
+                    else:
+                        self.bot.sendMsg(channel, nick + ': No results found. If this page should exist, please consider contributing to the wiki! http://atlwiki.net')                    
+                else:
+                    self.bot.sendMsg(channel, nick + ": http://atlwiki.net")                    
+    
+            elif testmsg[:5] == '*wiki':
+                toParse = msg[5:].rstrip().lstrip()
+                toParse = toParse.replace('\'', '%27')
+                parList = toParse.split(' ')
+                if parList[0] != '':
+                    term1 = parList.pop(0)
+                    term1 = term1[:1].upper() + term1[1:]
+                    searchTerm = term1
+                    instantURL = term1
+                    for i in parList:
+                        term = i
+                        term = term[:1].upper() + term[1:]
+                        searchTerm = searchTerm + '%20' + term
+                    baseurl = "http://atlwiki.net/api.php?format=json&action=query&list=search&srsearch={}&srwhat=title"
+                    qurl = baseurl.format(searchTerm)
+                    openurl = urlopen(qurl).read()
+                    jsread = json.loads(openurl.decode('utf-8'))
+                    numTitles = len(jsread['query']['search'])
+                    if numTitles > 0:
+                        eMatch = False
+                        for i in jsread['query']['search']:
+                            if i['title'].lower() == toParse.strip().lower():
+                                self.bot.sendMsg(channel, nick + ": Exact Match Found! " + i['title'] + '  -  http://atlwiki.net/{}'.format(i['title'].replace(' ', '_')))
+                                eMatch = True
+                                break
+                        if not eMatch:
+                            topres = jsread['query']['search'][0]
+                            self.bot.sendMsg(channel, nick + ": " + topres['title'] + '  -  http://atlwiki.net/{}'.format(topres['title'].replace(' ', '_')))
+                    else:
+                        self.bot.sendMsg(channel, nick + ': No results found. If this page should exist, please consider contributing to the wiki! http://atlwiki.net')                    
+                else:
+                    self.bot.sendMsg(channel, nick + ": http://atlwiki.net")
+        except:
+            print('Wiki Module Error')
+    
     def ytInfo(self, msg, channel, nick, client, msgMatch):
         '''Module to parse incoming messages for YouTube links and attempt to parse video info and reply to channel.'''
         parsemsg = self.getTestMsg(nick, msg)
