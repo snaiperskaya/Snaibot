@@ -27,6 +27,7 @@ import time
 import random
 import sqlite3
 import json
+import signal
 from datetime import timedelta
 from urllib.request import urlopen
 from xml.dom.minidom import parseString
@@ -762,8 +763,15 @@ class snaibot():
             try:
                 toParse = testmsg[5:].strip(' ')
                 expr = toParse.replace('^', '**')
-                num = eval(expr)
-                self.bot.sendMsg(channel, nick + ': The answer should be ' + str(num))
+                valid = True
+                for i in expr:
+                    if not i.isnumeric() and i not in ['+','-','(',')','*','/',' ']:
+                        valid = False
+                if expr.count('**') < 3 and valid == True:
+                    num = eval(expr)
+                    self.bot.sendMsg(channel, nick + ': The answer should be ' + str(num))
+                else:
+                    self.bot.sendMsg(channel, nick + ': ERROR - Formula too complex')
                 
             except:
                 self.bot.sendMsg(channel, nick + ': ERROR - Please check your formula...')
