@@ -675,18 +675,21 @@ class Bot(object):
 			self._modes[channel.upper()].add(mode)
 	
 	def _userModeUnset(self, channel, nick, mode):
-		if mode == 'o':
-			self._channels[channel.upper()]['ops'].remove(nick)
-		elif mode == 'h':
-			self._channels[channel.upper()]['hops'].remove(nick)			
-		elif mode == 'a':
-			self._channels[channel.upper()]['aops'].remove(nick)
-		elif mode == 'qo':
-			self._channels[channel.upper()]['owner'].remove(nick)
-		elif mode == 'v':
-			self._channels[channel.upper()]['voices'].remove(nick)
-		if nick == self._nick:
-			self._modes[channel.upper()].remove(mode)
+		try:
+			if mode == 'o':
+				self._channels[channel.upper()]['ops'].remove(nick)
+			elif mode == 'h':
+				self._channels[channel.upper()]['hops'].remove(nick)			
+			elif mode == 'a':
+				self._channels[channel.upper()]['aops'].remove(nick)
+			elif mode == 'qo':
+				self._channels[channel.upper()]['owner'].remove(nick)
+			elif mode == 'v':
+				self._channels[channel.upper()]['voices'].remove(nick)
+			if nick == self._nick:
+				self._modes[channel.upper()].remove(mode)
+		except:
+			print('*** Mode Unset Key Error ***')
 
 	def getOps(self, channel):
 		"""
