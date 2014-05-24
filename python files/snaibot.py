@@ -18,7 +18,7 @@
 
 
 __author__ = 'C.S.Putnam'
-__version__ = '3.6'
+__version__ = '3.6.5'
 
 import pythonircbot
 import configparser
@@ -27,7 +27,6 @@ import time
 import random
 import sqlite3
 import json
-import signal
 from datetime import timedelta
 from urllib.request import urlopen
 from xml.dom.minidom import parseString
@@ -206,7 +205,6 @@ class snaibot():
                 with open(self.configfile, 'w') as confile:
                     self.config.write(confile)
                     confile.close()
-            print('Config File found and updated!')
             
             
     def confListParser(self, configList):
@@ -242,8 +240,6 @@ class snaibot():
             namelist.update(self.bot.getOwner(channel))
         elif lev == 'own':
             namelist.update(self.bot.getOwner(channel))
-        
-        print(namelist)
         return namelist    
     
     
@@ -347,7 +343,7 @@ class snaibot():
                 toSend = toSend + ', *choose <opt1;opt2;etc>'
                 
             if modules['Wiki'].lower() == 'true':
-                toSend = toSend + ', *ftbwiki <searchterm>'            
+                toSend = toSend + ', *wiki <searchterm>, *fullwiki <searchterm>'            
                 
             if modules['Calculator'].lower() == 'true':
                 toSend = toSend + ', *calc <expression>'            
@@ -556,27 +552,27 @@ class snaibot():
                         else:
                             testmessage = testmsg.split()
                             comm = testmessage.pop(0)
-                            for nick in testmessage:
+                            for nik in testmessage:
                                 if comm == '*kick':
-                                    self.bot.kickUser(channel, nick, 'Requested by {}'.format(nick))
+                                    self.bot.kickUser(channel, nik, 'Requested by {}'.format(nick))
                                 elif comm == '*v':
-                                    self.bot.setMode(channel, nick, 'v')
-                                    self.updateSQLTableCM(channel, nick, 'v')
+                                    self.bot.setMode(channel, nik, 'v')
+                                    self.updateSQLTableCM(channel, nik, 'v')
                                 elif comm == '*h':
-                                    self.bot.setMode(channel, nick, 'h')
-                                    self.updateSQLTableCM(channel, nick, 'h')
+                                    self.bot.setMode(channel, nik, 'h')
+                                    self.updateSQLTableCM(channel, nik, 'h')
                                 elif comm == '*o':
-                                    self.bot.setMode(channel, nick, 'o')
-                                    self.updateSQLTableCM(channel, nick, 'o')
+                                    self.bot.setMode(channel, nik, 'o')
+                                    self.updateSQLTableCM(channel, nik, 'o')
                                 elif comm == '*dv':
-                                    self.bot.unsetMode(channel, nick, 'v')
-                                    self.updateSQLTableCM(channel, nick, '-v')
+                                    self.bot.unsetMode(channel, nik, 'v')
+                                    self.updateSQLTableCM(channel, nik, '-v')
                                 elif comm == '*dh':
-                                    self.bot.unsetMode(channel, nick, 'h')
-                                    self.updateSQLTableCM(channel, nick, '-h')
+                                    self.bot.unsetMode(channel, nik, 'h')
+                                    self.updateSQLTableCM(channel, nik, '-h')
                                 elif comm == '*do':
-                                    self.bot.unsetMode(channel, nick, 'o')
-                                    self.updateSQLTableCM(channel, nick, '-o')
+                                    self.bot.unsetMode(channel, nik, 'o')
+                                    self.updateSQLTableCM(channel, nik, '-o')
                             
                 else:
                     if testmsg == '*admin':
@@ -765,7 +761,7 @@ class snaibot():
                 expr = toParse.replace('^', '**')
                 valid = True
                 for i in expr:
-                    if not i.isnumeric() and i not in ['+','-','(',')','*','/',' ']:
+                    if not i.isnumeric() and i not in ['+','-','(',')','*','/',' ','.']:
                         valid = False
                 if expr.count('**') < 3 and valid == True:
                     num = eval(expr)
