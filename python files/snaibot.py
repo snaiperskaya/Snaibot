@@ -18,7 +18,7 @@
 
 
 __author__ = 'C.S.Putnam'
-__version__ = '3.6.5'
+__version__ = '3.7.0'
 
 import pythonircbot
 import configparser
@@ -54,9 +54,8 @@ class snaibot():
                             'admin':self.remoteAdmin,
                             'wiki':self.searchWiki,
                             'youtube':self.ytInfo,
-                            'calculator':self.calculator}
-                            #'listening':'',
-                            #'speech':''}
+                            'calculator':self.calculator,
+                            'dice':self.diceRoll}
                             
         self.joinmodulestate = {}
         
@@ -173,7 +172,8 @@ class snaibot():
                                     'Wiki':'False',
                                     'Youtube':'False',
                                     'Calculator':'False',
-                                    'Auto Mode':'False'}
+                                    'Auto Mode':'False',
+                                    'Dice':'False'}
             
             self.config['KICK/BAN Settings'] = {'Number of repeat messages before kick': '5',
                                            'Number of kicks before channel ban': '5',
@@ -182,7 +182,7 @@ class snaibot():
             self.config['Keyword Links'] = {'source':'https://github.com/snaiperskaya/Snaibot/',
                                        'snaibot':'I was built by snaiperskaya for the good of all mankind...'}
             
-            self.config['Secret Links'] = {'secret':'These links will not show up in .commands and will only send via query.'}
+            self.config['Secret Links'] = {'secret':'These links will not show up in *commands and will only send via query.'}
             
             self.config['NEWS'] = {'News Item':'*Insert Useful News Here*'}
             
@@ -307,7 +307,9 @@ class snaibot():
     def stripped(self, x):
         '''Helper function for the language filter. Strips extra-extraneous characters from string x and returns it.'''
         return "".join([i for i in x if ord(i) in range(32, 127)])
-                         
+
+
+
     """
     FUNCTIONS FOR MSG HANDLERS. (All must contain arguements for self, msg, channel, nick, client, msgMatch)
     """
@@ -343,10 +345,13 @@ class snaibot():
                 toSend = toSend + ', *choose <opt1;opt2;etc>'
                 
             if modules['Wiki'].lower() == 'true':
-                toSend = toSend + ', *wiki <searchterm>, *fullwiki <searchterm>'            
+                toSend = toSend + ', *atlwiki <searchterm>, *fullatlwiki <searchterm>'            
                 
             if modules['Calculator'].lower() == 'true':
-                toSend = toSend + ', *calc <expression>'            
+                toSend = toSend + ', *calc <expression>'
+            
+            if modules['Dice'].lower() == 'true':
+                toSend = toSend + ', *dice <#d#>'
             
             self.bot.sendMsg(channel, nick + ": " + toSend)            
     
@@ -519,7 +524,8 @@ class snaibot():
                                 self.bot.sendMsg(channel, nick + ": Please watch your language...")
                                 
                             break
-                    
+
+
     def remoteAdmin(self, msg, channel, nick, client, msgMatch):
         '''Module to allow command-based administration via chat from those either registered as admins in the config or those with OP+'''
         
@@ -613,7 +619,8 @@ class snaibot():
                             
         except:
             pass
-        
+
+    
     def searchWiki(self, msg, channel, nick, client, msgMatch):
         '''Module allows for searching ATLWiki.net for articles. Bot is largely used for a Minecraft Community, so this was extremely helpful as a resource.'''
         try:
@@ -621,8 +628,8 @@ class snaibot():
             nick = parsemsg[0]
             testmsg = parsemsg[1]
             msg = parsemsg[2]
-            if testmsg[:9] == '*fullwiki':
-                toParse = msg[9:].rstrip().lstrip()
+            if testmsg[:12] == '*fullatlwiki':
+                toParse = msg[12:].rstrip().lstrip()
                 toParse = toParse.replace('\'', '%27')
                 parList = toParse.split(' ')
                 if parList[0] != '':
@@ -648,8 +655,8 @@ class snaibot():
                 else:
                     self.bot.sendMsg(channel, nick + ": http://atlwiki.net")                    
     
-            elif testmsg[:5] == '*wiki':
-                toParse = msg[5:].rstrip().lstrip()
+            elif testmsg[:8] == '*atlwiki':
+                toParse = msg[8:].rstrip().lstrip()
                 toParse = toParse.replace('\'', '%27')
                 parList = toParse.split(' ')
                 if parList[0] != '':
@@ -682,6 +689,7 @@ class snaibot():
                     self.bot.sendMsg(channel, nick + ": http://atlwiki.net")
         except:
             print('Wiki Module Error')
+   
     
     def ytInfo(self, msg, channel, nick, client, msgMatch):
         '''Module to parse incoming messages for YouTube links and attempt to parse video info and reply to channel.'''
@@ -748,9 +756,10 @@ class snaibot():
                 except:
                     ratestr = 'N/A'
                 self.bot.sendMsg(channel,'"{}" by {} ( Views: {}   Rating: {}   Duration: {} )'.format(video_title, author, views, ratestr, time))
-                
-                
+
+
     def calculator(self, msg, channel, nick, client, msgMatch):
+        '''Basic Calculator with minor safeguards in place to reduce abuse. Uses the format *calc <expression>'''
         parsemsg = self.getTestMsg(nick, msg)
         nick = parsemsg[0]
         testmsg = parsemsg[1]
@@ -765,14 +774,46 @@ class snaibot():
                         valid = False
                 if expr.count('**') < 3 and valid == True:
                     num = eval(expr)
-                    self.bot.sendMsg(channel, nick + ': The answer should be ' + str(num))
+                    strnum = str(num)
+                    if len(strnum) > 30:
+                        strnum = strnum[:30] + '... char limit exceeded ...'
+                    self.bot.sendMsg(channel, nick + ': The answer should be ' + strnum)
                 else:
-                    self.bot.sendMsg(channel, nick + ': ERROR - Formula too complex')
-                
+                    self.bot.sendMsg(channel, nick + ': ERROR - Formula too complex') 
             except:
                 self.bot.sendMsg(channel, nick + ': ERROR - Please check your formula...')
     
+    
     def autoModeSet(self, channel, nick, client):
+        '''Module to automatically promote users joining a channel to their assigned level. This can only be done on user snaibot recognizes in its database and only levels at or below its own.'''
         mode = self.modeSQLCheck(channel, nick.lower())
         if mode in ['v', 'h', 'o']:
             self.bot.setMode(channel, nick, mode)
+   
+    
+    def diceRoll(self, msg, channel, nick, client, msgMatch):
+        '''A simple DnD-esque dice roll module using the #d# notation. The format is *dice <number of dice to roll>d<sides per die>. Output will include the total as well as a list of all dice rolled up to character limit of channel.'''
+        parsemsg = self.getTestMsg(nick, msg)
+        nick = parsemsg[0]
+        testmsg = parsemsg[1]
+        
+        if testmsg[:5] == '*dice':
+            test = testmsg[5:].lower().strip(' ').split('d')
+            if len(test) == 2:
+                if test[0].isdigit() and test[1].isdigit():
+                    numDice = int(test[0])
+                    numSides = int(test[1])
+                    roll = 0
+                    rolls = []
+                    if numDice > 0 and numSides > 1:
+                        for i in range(1, numDice + 1):
+                            d = random.randint(1, numSides)
+                            roll = roll + d
+                            rolls.append(d)
+                        self.bot.sendMsg(channel, nick + ': Total value rolled was {} - Dice Rolled: {}'.format(roll, rolls))
+                    else:
+                        self.bot.sendMsg(channel, nick + ': Error: Invalid numbers. Please try again.')                    
+                else:
+                    self.bot.sendMsg(channel, nick + ': Error: Non Digit Dice Values (#d# required)')
+            else:
+                self.bot.sendMsg(channel, nick + ': Error: Invalid Format (#d# required)')
